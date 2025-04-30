@@ -2,6 +2,49 @@
 
 Sistema de Punto de Venta (POS) desarrollado con Laravel, diseñado para gestionar ventas, inventario, clientes y reportes de manera eficiente.
 
+## Inicio Rápido
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/rojoprogramador/ventasPlus.git
+cd ventaplus
+
+# 2. Instalar dependencias
+composer install
+npm install
+
+# 3. Configurar entorno
+cp .env.example .env
+php artisan key:generate
+
+# 4. Crear y configurar base de datos en PostgreSQL
+creatdb ventasplus
+
+# 5. Ejecutar migraciones y seeders
+php artisan migrate:fresh --seed
+
+# 6. Compilar assets
+npm run build
+
+# 7. Iniciar servidor de desarrollo
+php artisan serve
+
+# 8. En otra terminal, iniciar Vite para desarrollo frontend
+npm run dev
+```
+
+Visita http://localhost:8000 en tu navegador.
+
+## Stack Tecnológico
+
+- **Backend:** Laravel 10.x
+- **Frontend:** Vue.js + Inertia.js (via Laravel Breeze)
+- **CSS:** Tailwind CSS
+- **Base de datos:** PostgreSQL 14
+- **Autenticación:** Laravel Breeze
+- **Testing:** Pest PHP
+- **Assets:** Vite
+
 ## Requisitos
 
 - PHP >= 8.1
@@ -57,6 +100,23 @@ php artisan test
 
 ## Usuarios por defecto
 
+El sistema viene con tres usuarios predefinidos:
+
+1. **Administrador**
+   - Email: admin@ventaplus.com
+   - Password: admin123
+   - Rol: Administrador
+
+2. **Vendedor**
+   - Email: vendedor@ventaplus.com
+   - Password: vendedor123
+   - Rol: Vendedor
+
+3. **Cajero**
+   - Email: cajero@ventaplus.com
+   - Password: cajero123
+   - Rol: Cajero
+
 - **Administrador**
   - Email: admin@ventaplus.com
   - Password: admin123
@@ -78,6 +138,145 @@ php artisan test
 - Reportes y estadísticas
 - Control de cajas
 - Sistema de cotizaciones
+
+## Estructura del Proyecto
+
+```
+ventaplus/
+├── app/
+│   ├── Http/Controllers/    # Controladores
+│   ├── Models/              # Modelos Eloquent
+│   └── Providers/           # Proveedores de servicios
+├── database/
+│   ├── migrations/         # Migraciones de base de datos
+│   └── seeders/           # Seeders para datos iniciales
+├── resources/
+│   ├── js/                # Componentes Vue.js
+│   └── views/             # Vistas Blade
+├── routes/                # Definición de rutas
+└── tests/                # Tests automatizados
+```
+
+## Herramientas del Proyecto
+
+### Artisan - La Interfaz de Comandos de Laravel
+
+Artisan es la interfaz de línea de comandos incluida en Laravel. Proporciona comandos útiles para ayudarte mientras construyes tu aplicación. Para ver una lista de todos los comandos disponibles, ejecuta:
+
+```bash
+php artisan list
+```
+#### Comandos de Generación de Código
+```bash
+# Crear un nuevo controlador - Maneja las peticiones HTTP y la lógica de la aplicación
+php artisan make:controller NombreController
+
+# Crear un nuevo modelo con migración - Representa una tabla en la base de datos
+# La opción -m crea automáticamente la migración asociada
+php artisan make:model Nombre -m
+
+# Crear un nuevo seeder - Para poblar la base de datos con datos iniciales
+php artisan make:seeder NombreSeeder
+
+# Crear un nuevo test - Para pruebas automatizadas
+php artisan make:test NombreTest
+```
+
+#### Comandos de Inspección y Mantenimiento
+```bash
+# Listar todas las rutas registradas en la aplicación
+php artisan route:list
+
+# Limpiar diferentes tipos de caché:
+php artisan cache:clear    # Limpia el caché de la aplicación
+php artisan config:clear   # Limpia el caché de configuración
+php artisan view:clear     # Limpia el caché de vistas compiladas
+```
+
+### Migraciones - Control de Versiones para Base de Datos
+
+Las migraciones son como un control de versiones para tu base de datos. Permiten que tu equipo modifique y comparta el esquema de la base de datos de manera sencilla. Son especialmente útiles cuando trabajas en equipo o necesitas mantener un historial de cambios en la estructura de la base de datos.
+
+```bash
+# Ejecutar migraciones pendientes
+php artisan migrate
+
+# Revertir última migración
+php artisan migrate:rollback
+
+# Revertir todas las migraciones
+php artisan migrate:reset
+
+# Revertir y volver a ejecutar migraciones
+php artisan migrate:refresh
+
+# Eliminar todas las tablas y ejecutar migraciones
+php artisan migrate:fresh
+
+# Ejecutar migraciones con seeders
+php artisan migrate:fresh --seed
+```
+
+### NPM - Gestor de Paquetes de Node.js
+
+NPM (Node Package Manager) se usa para gestionar las dependencias de frontend y compilar assets. En nuestro proyecto, lo usamos principalmente para:
+- Gestionar dependencias de JavaScript
+- Compilar archivos Vue.js
+- Procesar CSS con Tailwind
+- Ejecutar Vite para el desarrollo
+
+```bash
+# Instalar dependencias
+npm install
+
+# Compilar assets para desarrollo
+npm run dev
+
+# Compilar assets para producción
+npm run build
+```
+
+### Testing - Pruebas Automatizadas
+
+Utilizamos Pest PHP, un elegante framework de testing que hace que las pruebas sean más expresivas y fáciles de escribir. Las pruebas nos ayudan a:
+- Verificar que el código funciona como se espera
+- Detectar errores temprano
+- Facilitar el mantenimiento y refactorización
+- Documentar el comportamiento esperado
+
+```bash
+# Ejecutar todos los tests
+php artisan test
+
+# Ejecutar tests específicos
+php artisan test --filter NombreTest
+
+# Ejecutar tests con cobertura
+php artisan test --coverage
+```
+
+## Laravel Breeze - Sistema de Autenticación
+
+Laravel Breeze es un starter kit que proporciona una implementación mínima y simple de todas las características de autenticación de Laravel, incluyendo:
+
+- Login
+- Registro
+- Recuperación de contraseña
+- Verificación de email
+- Confirmación de contraseña
+- Gestión de perfil
+
+### Personalización de Breeze
+
+Los archivos principales se encuentran en:
+
+```
+resources/js/Pages/Auth/      # Componentes de autenticación
+resources/js/Layouts/         # Layouts principales
+resources/js/Components/      # Componentes reutilizables
+app/Http/Controllers/Auth/    # Controladores de autenticación
+routes/auth.php              # Rutas de autenticación
+```
 
 ## Contributing
 
