@@ -3,7 +3,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 const props = defineProps({
-    auth: Object
+    auth: {
+        type: Object,
+        required: true
+    }
 });
 </script>
 
@@ -22,7 +25,7 @@ const props = defineProps({
                         <h3 class="text-lg font-semibold mb-4">Panel de Control</h3>
                         
                         <!-- Enlaces de administración -->
-                        <div v-if="auth.user.rol.nombre === 'admin'" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div v-if="auth?.user?.rol?.nombre === 'admin'" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <Link 
                                 href="/roles"
                                 class="flex items-center p-4 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors">
