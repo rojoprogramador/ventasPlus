@@ -40,17 +40,21 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Rutas de roles y usuarios (solo para administradores)
-    Route::middleware(['role:admin'])->group(function () {
+    // Rutas de roles y usuarios (requieren permisos específicos)
+    Route::middleware(['auth'])->group(function () {
         // Roles
-        Route::get('/roles', [RolController::class, 'index'])->name('roles.index');
-        Route::post('/roles', [RolController::class, 'store'])->name('roles.store');
-        Route::put('/roles/{rol}', [RolController::class, 'update'])->name('roles.update');
+        Route::middleware(['permiso:gestion_roles'])->group(function () {
+            Route::get('/roles', [RolController::class, 'index'])->name('roles.index');
+            Route::post('/roles', [RolController::class, 'store'])->name('roles.store');
+            Route::put('/roles/{rol}', [RolController::class, 'update'])->name('roles.update');
+        });
 
         // Usuarios
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::post('/users', [UserController::class, 'store'])->name('users.store');
-        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::middleware(['permiso:gestion_usuarios'])->group(function () {
+            Route::get('/users', [UserController::class, 'index'])->name('users.index');
+            Route::post('/users', [UserController::class, 'store'])->name('users.store');
+            Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        });
     });
 });
 

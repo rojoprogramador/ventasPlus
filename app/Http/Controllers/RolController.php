@@ -5,11 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Rol;
 use App\Models\Log;
 use App\Models\Permiso;
+use App\Traits\VerificaPermisos;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class RolController extends Controller
 {
+    use VerificaPermisos;
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (!$this->tienePermiso('gestion_roles')) {
+                abort(403, 'No tienes permiso para gestionar roles.');
+            }
+            return $next($request);
+        });
+    }
     public function index()
     {
         $roles = Rol::with('permisos')->get();

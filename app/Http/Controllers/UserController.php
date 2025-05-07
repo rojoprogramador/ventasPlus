@@ -5,12 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Rol;
 use App\Models\Log;
+use App\Traits\VerificaPermisos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class UserController extends Controller
 {
+    use VerificaPermisos;
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (!$this->tienePermiso('gestion_usuarios')) {
+                abort(403, 'No tienes permiso para gestionar usuarios.');
+            }
+            return $next($request);
+        });
+    }
     public function index()
     {
         return Inertia::render('Users/Index', [
