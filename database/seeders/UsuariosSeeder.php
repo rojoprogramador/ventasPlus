@@ -19,7 +19,7 @@ class UsuariosSeeder extends Seeder
             'email' => 'admin@ventaplus.com',
             'password' => bcrypt('admin123'),
             'rol_id' => 1, // admin
-            'estado' => 'activo'
+            'estado' => true
         ]);
 
         \App\Models\User::create([
@@ -27,7 +27,7 @@ class UsuariosSeeder extends Seeder
             'email' => 'vendedor@ventaplus.com',
             'password' => bcrypt('vendedor123'),
             'rol_id' => 2, // vendedor
-            'estado' => 'activo'
+            'estado' => true
         ]);
 
         \App\Models\User::create([
@@ -35,7 +35,7 @@ class UsuariosSeeder extends Seeder
             'email' => 'cajero@ventaplus.com',
             'password' => bcrypt('cajero123'),
             'rol_id' => 3, // cajero
-            'estado' => 'activo'
+            'estado' => true
         ]);
     }
 }

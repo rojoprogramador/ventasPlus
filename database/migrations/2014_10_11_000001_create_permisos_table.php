@@ -13,8 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('rol_permiso', function (Blueprint $table) {
+        Schema::create('permisos', function (Blueprint $table) {
             $table->id();
+            $table->string('nombre')->unique();
+            $table->string('descripcion')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rol_permiso');
+        Schema::dropIfExists('permisos');
     }
 };

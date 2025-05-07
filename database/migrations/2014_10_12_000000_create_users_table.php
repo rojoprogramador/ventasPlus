@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->foreignId('rol_id')->constrained('roles');
-            $table->enum('estado', ['activo', 'inactivo'])->default('activo');
+            $table->boolean('estado')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });

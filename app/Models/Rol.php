@@ -27,7 +27,7 @@ class Rol extends Model
     ];
 
     /**
-     * Get the usuarios for the rol.
+     * Get the permisos for the rol.
      */
     public function usuarios()
     {

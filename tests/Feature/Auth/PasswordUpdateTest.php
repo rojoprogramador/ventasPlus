@@ -6,14 +6,23 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
+use App\Models\Rol;
 
 class PasswordUpdateTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->vendedorRol = Rol::create(['nombre' => 'vendedor', 'descripcion' => 'Vendedor']);
+    }
+
     public function test_password_can_be_updated(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'rol_id' => $this->vendedorRol->id
+        ]);
 
         $response = $this
             ->actingAs($user)
@@ -33,7 +42,9 @@ class PasswordUpdateTest extends TestCase
 
     public function test_correct_password_must_be_provided_to_update_password(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'rol_id' => $this->vendedorRol->id
+        ]);
 
         $response = $this
             ->actingAs($user)
