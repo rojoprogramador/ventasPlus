@@ -33,4 +33,14 @@ class Permiso extends Model
     {
         return $this->belongsToMany(Rol::class, 'rol_permiso');
     }
+
+    /**
+     * Get the users that have this permiso.
+     */
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_permiso')
+                    ->withPivot('habilitado')
+                    ->withTimestamps();
+    }
 }

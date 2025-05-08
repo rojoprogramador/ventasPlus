@@ -131,13 +131,63 @@ El sistema viene con tres usuarios predefinidos:
 
 ## Características
 
+### Gestión de Usuarios y Permisos
+
+#### Funcionalidades Principales
+- Creación y edición de usuarios
+- Asignación de roles predefinidos
+- Personalización de permisos individuales
+- Gestión de contraseñas seguras
+- Desactivación temporal de usuarios
+- Historial de auditoría de cambios
+
+#### Roles y Permisos
+- Sistema jerárquico de roles
+- Permisos heredados del rol
+- Permisos individuales por usuario
+- Control granular de acceso
+
+#### Seguridad
+- Políticas de contraseñas robustas
+  - Mínimo 8 caracteres
+  - Al menos una mayúscula
+  - Al menos una minúscula
+  - Al menos un número
+  - Al menos un carácter especial
+- Protección contra ataques de fuerza bruta
+- Registro de actividades de usuario
+
+#### Interfaz de Usuario
+- Dashboard intuitivo
+- Gestión visual de permisos
+- Feedback en tiempo real
+- Diseño responsive
+
+### Otras Características
 - Gestión de ventas
 - Control de inventario
 - Gestión de clientes
-- Gestión de usuarios y roles
 - Reportes y estadísticas
 - Control de cajas
 - Sistema de cotizaciones
+
+## Tests
+
+### Tests de Usuario y Permisos
+
+Ejecutar los tests específicos del módulo de usuarios:
+
+```bash
+php artisan test tests/Feature/UserControllerTest.php
+```
+
+Los tests cubren:
+- Listado de usuarios
+- Creación de usuarios
+- Actualización de datos
+- Gestión de permisos individuales
+- Validación de contraseñas
+- Control de acceso
 
 ## Estructura del Proyecto
 

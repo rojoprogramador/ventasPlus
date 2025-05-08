@@ -52,4 +52,53 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Rol::class);
     }
+
+    /**
+     * Get the permisos individuales for the user.
+     */
+    public function permisos()
+    {
+        return $this->belongsToMany(Permiso::class, 'user_permiso')
+                    ->withPivot('habilitado')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Verifica si el usuario tiene un permiso específico.
+     * Primero verifica permisos individuales, luego los del rol.
+     */
+    public function tienePermiso($nombrePermiso)
+    {
+        // Verificar permisos individuales primero
+        $permisoIndividual = $this->permisos()
+            ->where('nombre', $nombrePermiso)
+            ->wherePivot('habilitado', true)
+            ->first();
+
+        if ($permisoIndividual) {
+            return true;
+        }
+
+        // Si no tiene permiso individual, verificar permisos del rol
+        return $this->rol->permisos->contains('nombre', $nombrePermiso);
+    }
+
+    /**
+     * Asigna un permiso individual al usuario.
+     */
+    public function asignarPermiso($permisoId, $habilitado = true)
+    {
+        return $this->permisos()->syncWithoutDetaching([
+            $permisoId => ['habilitado' => $habilitado]
+        ]);
+    }
+
+    /**
+     * Revoca un permiso individual del usuario.
+     */
+    public function revocarPermiso($permisoId)
+    {
+        return $this->permisos()->detach($permisoId);
+    }
+
 }
