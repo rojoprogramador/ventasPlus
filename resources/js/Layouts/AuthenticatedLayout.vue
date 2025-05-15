@@ -32,6 +32,12 @@ const showingNavigationDropdown = ref(false);
                                 <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
                                 </NavLink>
+                                <!-- Enlaces de Ventas -->
+                                <template v-if="$page.props.auth.user.rol.nombre === 'cajero' || $page.props.auth.user.rol.nombre === 'admin'">
+                                    <NavLink :href="route('ventas.registro')" :active="route().current('ventas.registro')">
+                                        Registro de Ventas
+                                    </NavLink>
+                                </template>
                                 <!-- Enlaces de Administración -->
                                 <template v-if="$page.props.auth.user.rol.nombre === 'admin'">
                                     <NavLink :href="route('users.index')" :active="route().current('users.index')">
@@ -124,6 +130,11 @@ const showingNavigationDropdown = ref(false);
                         <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
                         </ResponsiveNavLink>
+                        <template v-if="$page.props.auth.user.rol.nombre === 'cajero' || $page.props.auth.user.rol.nombre === 'admin'">
+                            <ResponsiveNavLink :href="route('ventas.registro')" :active="route().current('ventas.registro')">
+                                Registro de Ventas
+                            </ResponsiveNavLink>
+                        </template>
                     </div>
 
                     <!-- Responsive Settings Options -->
