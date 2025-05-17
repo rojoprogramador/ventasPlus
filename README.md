@@ -15,7 +15,6 @@ npm install
 
 # 3. Configurar entorno
 cp .env.example .env
-php artisan key:generate
 
 # 4. Crear y configurar base de datos en PostgreSQL
 creatdb ventasplus
@@ -44,6 +43,8 @@ Visita http://localhost:8000 en tu navegador.
 - **Autenticación:** Laravel Breeze
 - **Testing:** Pest PHP
 - **Assets:** Vite
+- **PDF Generation:** barryvdh/laravel-dompdf
+- **Email:** Laravel Mail
 
 ## Requisitos
 
@@ -64,6 +65,7 @@ cd ventaplus
 2. Instalar dependencias de PHP:
 ```bash
 composer install
+composer require barryvdh/laravel-dompdf
 ```
 
 3. Instalar dependencias de Node.js:
@@ -170,6 +172,66 @@ El sistema viene con tres usuarios predefinidos:
 - Reportes y estadísticas
 - Control de cajas
 - Sistema de cotizaciones
+- Comprobantes de compra
+
+### Comprobantes de Compra
+
+#### Funcionalidades
+- Generación automática de comprobantes al finalizar una venta
+- Opciones para imprimir o enviar por correo electrónico
+- Posibilidad de omitir la generación del comprobante
+- Formato PDF profesional con toda la información de la venta
+- Reimpresión de comprobantes para ventas anteriores
+- Autocompletado de correo para clientes registrados
+- En pagos en efectivo, se muestra el cambio a devolver
+
+#### Información del Comprobante
+- Número único de venta
+- Fecha y hora de la transacción
+- Información del cajero
+- Lista detallada de productos comprados
+- Precios unitarios y cantidades
+- Subtotal de la compra
+- Descuentos aplicados
+- Total final
+- En pagos en efectivo: monto entregado y cambio
+
+#### Librerías y Configuración
+
+##### Generación de PDFs
+Se utiliza la librería `barryvdh/laravel-dompdf` para generar comprobantes en formato PDF:
+
+```bash
+composer require barryvdh/laravel-dompdf
+```
+
+Esta librería permite:
+- Generar PDFs a partir de plantillas Blade
+- Personalizar cabeceras, pie de página y estilos
+- Entregar los PDFs como descargas o visualización en el navegador
+- Guardar los PDFs en el servidor
+
+##### Envío de Correos Electrónicos
+Para el envío de comprobantes por correo, se utiliza el sistema de correo de Laravel. Es necesario configurar las credenciales SMTP en el archivo `.env`:
+
+```
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.ejemplo.com
+MAIL_PORT=587
+MAIL_USERNAME=tu_usuario
+MAIL_PASSWORD=tu_contraseña
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=comprobantes@ventasplus.com
+MAIL_FROM_NAME="VentasPlus"
+```
+
+##### Almacenamiento Temporal
+Los comprobantes generados para envío por correo se almacenan temporalmente en:
+```
+storage/app/public/comprobantes/
+```
+
+Asegúrate de que esta carpeta existe y tiene permisos de escritura.
 
 ## Tests
 

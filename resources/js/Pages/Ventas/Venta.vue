@@ -149,16 +149,86 @@
         </div>
       </div>
     </div>
+    </div>
+
+  <!-- Modal de Comprobante -->
+  <div v-if="mostrarModalComprobante" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-10">
+    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+      <h2 class="text-xl font-bold mb-4">Comprobante de Compra</h2>
+      
+      <div class="mb-4">
+        <p class="mb-2">¿Cómo desea recibir su comprobante?</p>
+        <div class="space-y-2">
+          <button @click="imprimirComprobante" class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            Imprimir comprobante
+          </button>
+          <button @click="mostrarEnvioEmail = true" class="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+            Enviar por correo electrónico
+          </button>
+          <button @click="omitirComprobante" class="w-full px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+            No deseo comprobante
+          </button>
+        </div>
+      </div>
+
+      <!-- Sección de envío por email -->
+      <div v-if="mostrarEnvioEmail" class="mt-4 border-t pt-4">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
+          <input 
+            v-model="emailCliente" 
+            type="email" 
+            class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+            placeholder="correo@ejemplo.com"
+          />
+        </div>
+        <div class="flex space-x-3">
+          <button @click="enviarComprobantePorEmail" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            Enviar
+          </button>
+          <button @click="mostrarEnvioEmail = false" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+            Cancelar
+          </button>
+        </div>
+      </div>
+
+      <!-- Sección de pago en efectivo -->
+      <div v-if="metodoPago === 'efectivo' && !mostrarEnvioEmail" class="mt-4 border-t pt-4">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Monto entregado</label>
+          <input 
+            v-model.number="montoEntregado" 
+            type="number" 
+            class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+            placeholder="0.00"
+          />
+        </div>
+        <div v-if="montoEntregado >= total" class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Cambio a devolver</label>
+          <p class="text-lg font-bold">${{ formatPrice(montoEntregado - total) }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
+import axios from 'axios'
 
 const productos = ref([])
 const carrito = ref([])
 const busqueda = ref('')
+
+// Variables para el comprobante
+const mostrarModalComprobante = ref(false)
+const mostrarEnvioEmail = ref(false)
+const emailCliente = ref('')
+const metodoPago = ref('efectivo') // Opciones: 'efectivo', 'tarjeta', 'transferencia'
+const montoEntregado = ref(0)
+const numeroVenta = ref(0)
+const ventaData = ref(null)
 
 // Cargar productos al inicio
 const cargarProductos = async () => {
@@ -289,29 +359,231 @@ const finalizarVenta = () => {
       return
     }
 
-    // Crear objeto de datos para enviar (solo para mostrar en la consola)
-    const ventaData = {
+    // Generar número único de venta (esto normalmente vendría del backend)
+    numeroVenta.value = Date.now().toString().slice(-8)
+
+    // Crear objeto de datos para enviar
+    ventaData.value = {
+      numero_venta: numeroVenta.value,
+      cajero: usePage().props.auth.user?.name || 'Usuario',
       detalles: carrito.value.map(item => ({
         producto_id: item.producto.id,
+        codigo: item.producto.codigo_barras,
+        nombre: item.producto.nombre,
         cantidad: item.cantidad,
         precio_unitario: item.precio_unitario,
         descuento: item.descuento || 0,
-        tipo_descuento: item.tipo_descuento || 'monto'
+        tipo_descuento: item.tipo_descuento || 'monto',
+        subtotal: item.precio_unitario * item.cantidad
       })),
-      total: subtotal.value,
-      fecha: new Date().toISOString()
+      subtotal: subtotal.value,
+      descuentos: descuentosTotales.value,
+      total: total.value,
+      fecha: new Date().toISOString(),
+      metodo_pago: metodoPago.value
     }
 
-    console.log('Datos de la venta:', ventaData)
+    console.log('Datos de la venta:', ventaData.value)
     
-    // Mostrar mensaje de éxito
-    alert('Venta finalizada con éxito')
+    // En una implementación real, aquí se enviaría ventaData al backend
+    // para guardar la venta en la base de datos
     
-    // Limpiar el carrito
-    carrito.value = []
+    // Mostrar modal de comprobante
+    mostrarModalComprobante.value = true
+    
+    // Si el cliente está registrado, autocompletar el email
+    if (usePage().props.auth?.cliente?.email) {
+      emailCliente.value = usePage().props.auth.cliente.email
+    }
   } catch (error) {
     console.error('Error en finalizarVenta:', error)
     alert('Ocurrió un error inesperado. Por favor, inténtelo nuevamente.')
   }
+}
+
+// Métodos para el manejo de comprobantes
+const generarComprobante = () => {
+  // Esta función generaría el HTML del comprobante
+  // Este es un ejemplo simplificado
+  const fecha = new Date().toLocaleString()
+  
+  let contenido = `
+    <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+      <h1 style="text-align: center;">VentasPlus</h1>
+      <h2 style="text-align: center;">Comprobante de Compra</h2>
+      <div style="border-top: 1px solid #eee; border-bottom: 1px solid #eee; padding: 10px 0; margin: 20px 0;">
+        <p><strong>No. Venta:</strong> ${ventaData.value.numero_venta}</p>
+        <p><strong>Fecha:</strong> ${fecha}</p>
+        <p><strong>Cajero:</strong> ${ventaData.value.cajero}</p>
+      </div>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background-color: #f3f4f6;">
+            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Producto</th>
+            <th style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">Precio Unit.</th>
+            <th style="padding: 8px; text-align: center; border-bottom: 1px solid #ddd;">Cant.</th>
+            <th style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+  `
+  
+  ventaData.value.detalles.forEach(item => {
+    contenido += `
+      <tr>
+        <td style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">${item.nombre}</td>
+        <td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">$${formatPrice(item.precio_unitario)}</td>
+        <td style="padding: 8px; text-align: center; border-bottom: 1px solid #ddd;">${item.cantidad}</td>
+        <td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">$${formatPrice(item.subtotal)}</td>
+      </tr>
+    `
+  })
+  
+  contenido += `
+        </tbody>
+      </table>
+      <div style="margin-top: 20px; text-align: right;">
+        <p><strong>Subtotal:</strong> $${formatPrice(ventaData.value.subtotal)}</p>
+        <p><strong>Descuentos:</strong> $${formatPrice(ventaData.value.descuentos)}</p>
+        <p style="font-size: 1.2em;"><strong>Total:</strong> $${formatPrice(ventaData.value.total)}</p>
+  `
+  
+  // Si fue pago en efectivo, mostrar el monto entregado y el cambio
+  if (metodoPago.value === 'efectivo' && montoEntregado.value > 0) {
+    const cambio = montoEntregado.value - ventaData.value.total
+    contenido += `
+      <p><strong>Monto entregado:</strong> $${formatPrice(montoEntregado.value)}</p>
+      <p><strong>Cambio:</strong> $${formatPrice(cambio)}</p>
+    `
+  }
+  
+  contenido += `
+      </div>
+      <div style="margin-top: 40px; text-align: center; font-size: 0.9em; color: #666;">
+        <p>Gracias por su compra</p>
+        <p>Para cualquier duda o aclaración, conserve este comprobante</p>
+      </div>
+    </div>
+  `
+  
+  return contenido
+}
+
+const imprimirComprobante = async () => {
+  try {
+    console.log('Iniciando generación de comprobante...')
+    
+    // Usar axios para generar el PDF directamente
+    const datosCompletosVenta = {
+      ...ventaData.value,
+      monto_entregado: montoEntregado.value || 0
+    }
+    
+    console.log('Datos enviados al servidor:', JSON.stringify(datosCompletosVenta))
+    
+    // Usar axios para hacer la petición con el token CSRF automáticamente incluido
+    const response = await axios.post(route('ventas.comprobante.generar'), datosCompletosVenta, {
+      responseType: 'blob', // Importante para recibir datos binarios (PDF)
+    })
+    
+    console.log('Respuesta recibida:', response.status, response.headers)
+    
+    // Verificar si la respuesta es un error en formato JSON (no un PDF)
+    if (response.data.type && response.data.type.includes('application/json')) {
+      // Convertir el blob a texto para leer el mensaje de error
+      const errorText = await new Response(response.data).text()
+      console.error('Error en formato JSON:', errorText)
+      const errorJson = JSON.parse(errorText)
+      throw new Error(errorJson.error || 'Error desconocido al generar el PDF')
+    }
+    
+    // Crear blob y URL para descargar el PDF directamente
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+    const fileURL = window.URL.createObjectURL(blob)
+    
+    // Crear un enlace de descarga y hacer clic en él automáticamente
+    const link = document.createElement('a')
+    link.href = fileURL
+    link.setAttribute('download', `comprobante_${ventaData.value.numero_venta}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    
+    // Limpiar
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(fileURL) // Liberar memoria
+    
+    // Limpiar el carrito después de imprimir
+    finalizarProceso()
+  } catch (error) {
+    console.error('Error al imprimir comprobante:', error)
+    
+    // Mostrar mensaje de error más detallado
+    let errorMessage = 'Ocurrió un error al intentar imprimir.'
+    
+    if (error.response) {
+      console.error('Error de respuesta:', error.response.data, error.response.status)
+      if (error.response.data && typeof error.response.data === 'object') {
+        errorMessage += ' Detalles: ' + JSON.stringify(error.response.data)
+      }
+    } else if (error.request) {
+      console.error('Error de solicitud:', error.request)
+      errorMessage += ' No se recibió respuesta del servidor.'
+    } else {
+      console.error('Error:', error.message)
+      errorMessage += ' ' + error.message
+    }
+    
+    alert(errorMessage + ' Por favor, inténtelo nuevamente.')
+  }
+}
+
+const enviarComprobantePorEmail = async () => {
+  try {
+    if (!emailCliente.value || !emailCliente.value.includes('@')) {
+      alert('Por favor, introduzca un correo electrónico válido.')
+      return
+    }
+    
+    // Preparar los datos con el email
+    const datosComprobante = {
+      ...ventaData.value,
+      email: emailCliente.value,
+      monto_entregado: montoEntregado.value || 0
+    }
+    
+    // Mostrar mensaje de espera
+    alert(`El comprobante será enviado a ${emailCliente.value} en breve.`)
+    
+    // Llamar a la API para enviar el comprobante por email
+    const response = await axios.post(route('ventas.comprobante.email'), datosComprobante)
+    
+    console.log('Comprobante enviado por email:', response.data)
+    
+    // Limpiar después de enviar
+    finalizarProceso()
+  } catch (error) {
+    console.error('Error al enviar comprobante por email:', error)
+    alert('Ocurrió un error al enviar el correo. Por favor, inténtelo nuevamente.')
+  }
+}
+
+const omitirComprobante = () => {
+  // Simplemente cerramos el modal y limpiamos
+  finalizarProceso()
+}
+
+const finalizarProceso = () => {
+  // Cerrar modal y limpiar
+  mostrarModalComprobante.value = false
+  mostrarEnvioEmail.value = false
+  emailCliente.value = ''
+  montoEntregado.value = 0
+  ventaData.value = null
+  
+  // Limpiar el carrito
+  carrito.value = []
+  
+  // Mostrar mensaje de éxito
+  alert('Venta finalizada con éxito')
 }
 </script>

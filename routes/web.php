@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VentaController;
+use App\Http\Controllers\DescuentoController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -38,7 +40,12 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::post('/descuentos/aplicar', [DescuentoController::class, 'aplicar'])->name('descuentos.aplicar');
     Route::get('/descuentos/historial/{venta}', [DescuentoController::class, 'historial'])->name('descuentos.historial');
-    Route::get('/ventas/nueva', \App\Http\Controllers\VentaController::class)->name('ventas.nueva');
+    Route::get('/ventas/nueva', VentaController::class)->name('ventas.nueva');
+    
+    // Rutas para comprobantes de venta
+    Route::post('/ventas/comprobante/generar', [VentaController::class, 'generarComprobante'])->name('ventas.comprobante.generar');
+    Route::post('/ventas/comprobante/email', [VentaController::class, 'enviarComprobantePorEmail'])->name('ventas.comprobante.email');
+    Route::get('/ventas/comprobante/reimprimir/{ventaId}', [VentaController::class, 'reimprimirComprobante'])->name('ventas.comprobante.reimprimir');
     
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
