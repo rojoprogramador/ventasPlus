@@ -20,7 +20,7 @@ const showingNavigationDropdown = ref(false);
                         <div class="flex">
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
-                                <Link :href="route('dashboard')">
+                                <Link :href="$page.props.ziggy.routes.dashboard">
                                     <ApplicationLogo
                                         class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200"
                                     />
@@ -29,15 +29,15 @@ const showingNavigationDropdown = ref(false);
 
                             <!-- Navigation Links -->
                             <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                                <NavLink :href="$page.props.ziggy.routes.dashboard" :active="$page.url === '/dashboard'">
                                     Dashboard
                                 </NavLink>
                                 <!-- Enlaces de Administración -->
                                 <template v-if="$page.props.auth.user.rol.nombre === 'admin'">
-                                    <NavLink :href="route('users.index')" :active="route().current('users.index')">
+                                    <NavLink :href="$page.props.ziggy.routes['users.index']" :active="$page.url.includes('/users')">
                                         Usuarios
                                     </NavLink>
-                                    <NavLink :href="route('roles.index')" :active="route().current('roles.index')">
+                                    <NavLink :href="$page.props.ziggy.routes['roles.index']" :active="$page.url.includes('/roles')">
                                         Roles
                                     </NavLink>
                                 </template>
@@ -73,8 +73,8 @@ const showingNavigationDropdown = ref(false);
                                     </template>
 
                                     <template #content>
-                                        <DropdownLink :href="route('profile.edit')"> Profile </DropdownLink>
-                                        <DropdownLink :href="route('logout')" method="post" as="button">
+                                        <DropdownLink :href="$page.props.ziggy.routes['profile.edit']"> Profile </DropdownLink>
+                                        <DropdownLink :href="$page.props.ziggy.routes.logout" method="post" as="button">
                                             Log Out
                                         </DropdownLink>
                                     </template>
@@ -121,7 +121,7 @@ const showingNavigationDropdown = ref(false);
                     class="sm:hidden"
                 >
                     <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                        <ResponsiveNavLink :href="$page.props.ziggy.routes.dashboard" :active="$page.url === '/dashboard'">
                             Dashboard
                         </ResponsiveNavLink>
                     </div>
@@ -136,8 +136,8 @@ const showingNavigationDropdown = ref(false);
                         </div>
 
                         <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')"> Profile </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('logout')" method="post" as="button">
+                            <ResponsiveNavLink :href="$page.props.ziggy.routes['profile.edit']"> Profile </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="$page.props.ziggy.routes.logout" method="post" as="button">
                                 Log Out
                             </ResponsiveNavLink>
                         </div>

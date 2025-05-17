@@ -27,6 +27,7 @@ class RolPermisoSeeder extends Seeder
             'gestion_clientes' => Permiso::where('nombre', 'gestion_clientes')->first()->id,
             'gestion_productos' => Permiso::where('nombre', 'gestion_productos')->first()->id,
             'gestion_ventas' => Permiso::where('nombre', 'gestion_ventas')->first()->id,
+            'aplicar_descuentos' => Permiso::where('nombre', 'aplicar_descuentos')->first()->id,
         ];
 
         // Asignar permisos al administrador (todos los permisos)
@@ -43,7 +44,8 @@ class RolPermisoSeeder extends Seeder
         // Asignar permisos al cajero
         $cajero->permisos()->sync([
             $permisos['ver_dashboard'],
-            $permisos['gestion_ventas']
+            $permisos['gestion_ventas'],
+            $permisos['aplicar_descuentos']
         ]);
     }
 }
