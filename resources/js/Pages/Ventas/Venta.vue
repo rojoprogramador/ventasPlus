@@ -351,7 +351,7 @@ const calcularDescuento = (item) => {
   return item.descuento
 }
 
-const finalizarVenta = () => {
+const finalizarVenta = async () => {
   try {
     // Validar carrito no vacío
     if (!carrito.value.length) {
@@ -385,15 +385,35 @@ const finalizarVenta = () => {
 
     console.log('Datos de la venta:', ventaData.value)
     
-    // En una implementación real, aquí se enviaría ventaData al backend
-    // para guardar la venta en la base de datos
-    
-    // Mostrar modal de comprobante
-    mostrarModalComprobante.value = true
-    
-    // Si el cliente está registrado, autocompletar el email
-    if (usePage().props.auth?.cliente?.email) {
-      emailCliente.value = usePage().props.auth.cliente.email
+    // Guardar la venta en el backend
+    try {
+      const response = await axios.post(route('ventas.guardar'), ventaData.value)
+      console.log('Venta guardada correctamente:', response.data)
+      
+      // Si la venta se guardó exitosamente, mostrar el modal de comprobante
+      if (response.data.success) {
+        // Almacenar el ID de la venta generado por el backend
+        ventaData.value.venta_id = response.data.venta_id
+        
+        // Mostrar modal de comprobante
+        mostrarModalComprobante.value = true
+        
+        // Si el cliente está registrado, autocompletar el email
+        if (usePage().props.auth?.cliente?.email) {
+          emailCliente.value = usePage().props.auth.cliente.email
+        }
+      } else {
+        throw new Error(response.data.error || 'Error desconocido al guardar la venta')
+      }
+    } catch (apiError) {
+      console.error('Error al guardar la venta en el backend:', apiError)
+      
+      // Mostrar mensaje de error específico si está disponible
+      if (apiError.response && apiError.response.data && apiError.response.data.error) {
+        alert('Error: ' + apiError.response.data.error)
+      } else {
+        alert('Error al guardar la venta. Por favor, verifique si hay una caja abierta e intente nuevamente.')
+      }
     }
   } catch (error) {
     console.error('Error en finalizarVenta:', error)

@@ -27,11 +27,11 @@ class Rol extends Model
     ];
 
     /**
-     * Get the permisos for the rol.
+     * Get the users that belong to this rol.
      */
     public function usuarios()
     {
-        return $this->hasMany(Usuario::class);
+        return $this->hasMany(User::class);
     }
 
     /**

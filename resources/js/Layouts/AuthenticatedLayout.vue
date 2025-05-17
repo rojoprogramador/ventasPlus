@@ -32,12 +32,18 @@ const showingNavigationDropdown = ref(false);
                                 <NavLink :href="$page.props.ziggy.routes.dashboard" :active="$page.url === '/dashboard'">
                                     Dashboard
                                 </NavLink>
+                                
+                                <!-- Enlace a Caja -->
+                                <NavLink :href="route('caja.index')" :active="$page.url.includes('/caja')">
+                                    Cierre de Caja
+                                </NavLink>
+                                
                                 <!-- Enlaces de Administración -->
-                                <template v-if="$page.props.auth.user.rol.nombre === 'admin'">
-                                    <NavLink :href="$page.props.ziggy.routes['users.index']" :active="$page.url.includes('/users')">
+                                <template v-if="$page.props.auth.user.rol && $page.props.auth.user.rol.nombre === 'admin'">
+                                    <NavLink :href="route('users.index')" :active="$page.url.includes('/users')">
                                         Usuarios
                                     </NavLink>
-                                    <NavLink :href="$page.props.ziggy.routes['roles.index']" :active="$page.url.includes('/roles')">
+                                    <NavLink :href="route('roles.index')" :active="$page.url.includes('/roles')">
                                         Roles
                                     </NavLink>
                                 </template>
