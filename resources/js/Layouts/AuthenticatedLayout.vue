@@ -80,7 +80,7 @@ const showingNavigationDropdown = ref(false);
 
                                     <template #content>
                                         <DropdownLink :href="$page.props.ziggy.routes['profile.edit']"> Profile </DropdownLink>
-                                        <DropdownLink :href="$page.props.ziggy.routes.logout" method="post" as="button">
+                                        <DropdownLink :href="route('logout')" method="post" as="button">
                                             Log Out
                                         </DropdownLink>
                                     </template>
@@ -143,7 +143,7 @@ const showingNavigationDropdown = ref(false);
 
                         <div class="mt-3 space-y-1">
                             <ResponsiveNavLink :href="$page.props.ziggy.routes['profile.edit']"> Profile </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="$page.props.ziggy.routes.logout" method="post" as="button">
+                            <ResponsiveNavLink :href="route('logout')" method="post" as="button">
                                 Log Out
                             </ResponsiveNavLink>
                         </div>

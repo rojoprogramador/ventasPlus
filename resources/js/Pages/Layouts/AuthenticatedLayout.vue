@@ -41,7 +41,7 @@
                 <DropdownLink :href="$page.props.ziggy.routes['profile.show']">
                   Profile
                 </DropdownLink>
-                <DropdownLink :href="$page.props.ziggy.routes.logout" method="post" as="button">
+                <DropdownLink :href="route('logout')" method="post" as="button">
                   Log Out
                 </DropdownLink>
               </template>

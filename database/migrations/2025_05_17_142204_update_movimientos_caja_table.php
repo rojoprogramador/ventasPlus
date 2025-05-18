@@ -34,6 +34,11 @@ return new class extends Migration
         
         // Si la tabla ya existe, añadir las columnas faltantes
         Schema::table('movimientos_caja', function (Blueprint $table) {
+            if (!Schema::hasColumn('movimientos_caja', 'usuario_id')) {
+                $table->unsignedBigInteger('usuario_id')->after('caja_id');
+                $table->foreign('usuario_id')->references('id')->on('users')->onDelete('restrict');
+            }
+            
             if (!Schema::hasColumn('movimientos_caja', 'tipo')) {
                 $table->string('tipo')->after('usuario_id'); // apertura, cierre, entrada, salida, etc.
             }
