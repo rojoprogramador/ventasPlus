@@ -38,6 +38,13 @@ const showingNavigationDropdown = ref(false);
                                     Cierre de Caja
                                 </NavLink>
                                 
+                                <!-- Enlaces de Ventas -->
+                                <template v-if="$page.props.auth.user.rol.nombre === 'cajero' || $page.props.auth.user.rol.nombre === 'admin'">
+                                    <NavLink :href="route('ventas.registro')" :active="route().current('ventas.registro')">
+                                        Registro de Ventas
+                                    </NavLink>
+                                </template>
+                                
                                 <!-- Enlaces de Administración -->
                                 <template v-if="$page.props.auth.user.rol && $page.props.auth.user.rol.nombre === 'admin'">
                                     <NavLink :href="route('users.index')" :active="$page.url.includes('/users')">
@@ -130,6 +137,18 @@ const showingNavigationDropdown = ref(false);
                         <ResponsiveNavLink :href="$page.props.ziggy.routes.dashboard" :active="$page.url === '/dashboard'">
                             Dashboard
                         </ResponsiveNavLink>
+                        
+                        <!-- Enlace a Caja (Responsivo) -->
+                        <ResponsiveNavLink :href="route('caja.index')" :active="$page.url.includes('/caja')">
+                            Cierre de Caja
+                        </ResponsiveNavLink>
+                        
+                        <!-- Enlaces de Ventas (Responsivo) -->
+                        <template v-if="$page.props.auth.user.rol.nombre === 'cajero' || $page.props.auth.user.rol.nombre === 'admin'">
+                            <ResponsiveNavLink :href="route('ventas.registro')" :active="route().current('ventas.registro')">
+                                Registro de Ventas
+                            </ResponsiveNavLink>
+                        </template>
                     </div>
 
                     <!-- Responsive Settings Options -->

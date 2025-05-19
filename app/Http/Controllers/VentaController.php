@@ -6,6 +6,7 @@ use App\Models\Producto;
 use App\Models\Venta;
 use App\Models\Caja;
 use App\Models\DetalleVenta;
+use App\Models\Cliente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,9 +14,39 @@ use Illuminate\Support\Facades\Mail;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Inertia\Inertia;
 
 class VentaController extends Controller
 {
+    /**
+     * Muestra la vista principal de registro de ventas
+     */
+    public function index()
+    {
+        return Inertia::render('Ventas/Registro', [
+            'productos' => [],
+            'clientes' => Cliente::where('estado', 'activo')->get()
+        ]);
+    }
+
+    /**
+     * Busca productos por nombre o código de barras
+     */
+    public function buscarProductos(Request $request)
+    {
+        $busqueda = $request->busqueda;
+        
+        $productos = Producto::where('estado', 'activo')
+            ->where(function($query) use ($busqueda) {
+                $query->where('nombre', 'LIKE', "%{$busqueda}%")
+                    ->orWhere('codigo', 'LIKE', "%{$busqueda}%");
+            })
+            ->where('stock', '>', 0)
+            ->get();
+            
+        return response()->json(['productos' => $productos]);
+    }
+
     /**
      * Guardar una nueva venta y actualizar el total de la caja abierta
      *
@@ -49,7 +80,6 @@ class VentaController extends Controller
             
             // Crear la venta
             $venta = new Venta();
-            // Removemos la línea de cliente_id ya que no existe la columna
             $venta->usuario_id = Auth::id();
             $venta->caja_id = $cajaAbierta->id;
             $venta->codigo = $request->numero_venta;
@@ -110,10 +140,102 @@ class VentaController extends Controller
             ], 500);
         }
     }
-    
-    public function __invoke()
+
+    /**
+     * Procesa y guarda una venta
+     */
+    public function store(Request $request)
     {
-        return inertia('Ventas/Venta');
+        $request->validate([
+            'productos' => 'required|array|min:1',
+            'productos.*.id' => 'required|exists:productos,id',
+            'productos.*.cantidad' => 'required|integer|min:1',
+            'tipo_pago' => 'required|in:efectivo,tarjeta,transferencia',
+            'monto_recibido' => 'required_if:tipo_pago,efectivo|numeric|min:0'
+        ], [
+            'productos.required' => 'Debe agregar al menos un producto para registrar la venta',
+            'productos.min' => 'Debe agregar al menos un producto para registrar la venta',
+        ]);
+
+        try {
+            // Verificar si hay una caja abierta
+            $cajaAbierta = Caja::where('estado', 'abierta')->first();
+            if (!$cajaAbierta) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay una caja abierta. Debe abrir una caja antes de realizar ventas.'
+                ], 400);
+            }
+            
+            DB::beginTransaction();
+            
+            // Calcular totales
+            $subtotal = 0;
+            foreach ($request->productos as $producto) {
+                $subtotal += $producto['precio_venta'] * $producto['cantidad'];
+            }
+            
+            $impuesto = $subtotal * 0.16; // 16% de impuesto
+            $total = $subtotal + $impuesto;
+            
+            // Crear la venta
+            $venta = Venta::create([
+                'usuario_id' => Auth::id(),
+                'cliente_id' => $request->cliente_id ?? 1, // Cliente por defecto si no se especifica
+                'caja_id' => $cajaAbierta->id,
+                'codigo' => 'V-' . time(),
+                'fecha' => now(),
+                'subtotal' => $subtotal,
+                'impuesto' => $impuesto,
+                'total' => $total,
+                'tipo_pago' => $request->tipo_pago,
+                'estado' => 'completado',
+                'observaciones' => $request->observaciones
+            ]);
+            
+            // Registrar los detalles de la venta y actualizar inventario
+            foreach ($request->productos as $item) {
+                $producto = Producto::findOrFail($item['id']);
+                
+                // Verificar stock disponible
+                if ($producto->stock < $item['cantidad']) {
+                    throw new \Exception("Stock insuficiente para {$producto->nombre}");
+                }
+                
+                // Crear detalle
+                DetalleVenta::create([
+                    'venta_id' => $venta->id,
+                    'producto_id' => $item['id'],
+                    'cantidad' => $item['cantidad'],
+                    'precio_unitario' => $item['precio_venta'],
+                    'subtotal' => $item['precio_venta'] * $item['cantidad']
+                ]);
+                
+                // Actualizar inventario
+                $producto->stock -= $item['cantidad'];
+                $producto->save();
+            }
+            
+            // Actualizar el total de ventas en la caja
+            $cajaAbierta->total_ventas += $total;
+            $cajaAbierta->save();
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'venta' => $venta,
+                'cambio' => $request->tipo_pago === 'efectivo' ? $request->monto_recibido - $total : 0
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al guardar venta: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
     }
     
     /**
@@ -253,5 +375,32 @@ class VentaController extends Controller
         
         // Retornar el PDF para descarga
         return $pdf->download($nombreArchivo);
+    }
+    
+    /**
+     * Generar y mostrar el comprobante de venta
+     */
+    public function comprobante($id)
+    {
+        $venta = Venta::with(['detalles.producto', 'cliente', 'usuario'])->findOrFail($id);
+        
+        return Inertia::render('Ventas/Comprobante', [
+            'venta' => $venta
+        ]);
+    }
+    
+    /**
+     * Cancelar una venta en proceso
+     */
+    public function cancelar(Request $request)
+    {
+        // Esta función se maneja directamente en el frontend
+        // ya que la venta aún no se ha guardado en la base de datos
+        return response()->json(['success' => true]);
+    }
+    
+    public function __invoke()
+    {
+        return inertia('Ventas/Venta');
     }
 }
