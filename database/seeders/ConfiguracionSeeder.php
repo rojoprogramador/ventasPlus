@@ -20,7 +20,7 @@ class ConfiguracionSeeder extends Seeder
             'direccion' => 'Calle Principal 123',
             'telefono' => '123456789',
             'email' => 'info@ventaplus.com',
-            'impuesto' => 18
+            'porcentaje_impuesto' => 18
         ]);
     }
 }

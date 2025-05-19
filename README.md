@@ -1,13 +1,13 @@
-# VentaPlus - Sistema POS
+# VentasPlus - Sistema POS
 
-Sistema de Punto de Venta (POS) desarrollado con Laravel, diseñado para gestionar ventas, inventario, clientes y reportes de manera eficiente.
+Sistema de Punto de Venta (POS) desarrollado con Laravel y Vue.js, diseñado para gestionar ventas, inventario, clientes, cierre de caja y reportes de manera eficiente.
 
 ## Inicio Rápido
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/rojoprogramador/ventasPlus.git
-cd ventaplus
+git clone https://github.com/tu-usuario/ventasPlus.git
+cd ventasPlus
 
 # 2. Instalar dependencias
 composer install
@@ -18,18 +18,26 @@ cp .env.example .env
 php artisan key:generate
 
 # 4. Crear y configurar base de datos en PostgreSQL
-creatdb ventasplus
+createdb ventasplus
 
-# 5. Ejecutar migraciones y seeders
+# 5. Configurar la base de datos en el archivo .env
+# DB_CONNECTION=pgsql
+# DB_HOST=127.0.0.1
+# DB_PORT=5432
+# DB_DATABASE=ventasplus
+# DB_USERNAME=tu_usuario
+# DB_PASSWORD=tu_contraseña
+
+# 6. Ejecutar migraciones y seeders
 php artisan migrate:fresh --seed
 
-# 6. Compilar assets
+# 7. Compilar assets
 npm run build
 
-# 7. Iniciar servidor de desarrollo
+# 8. Iniciar servidor de desarrollo
 php artisan serve
 
-# 8. En otra terminal, iniciar Vite para desarrollo frontend
+# 9. En otra terminal, iniciar Vite para desarrollo frontend
 npm run dev
 ```
 
@@ -44,6 +52,8 @@ Visita http://localhost:8000 en tu navegador.
 - **Autenticación:** Laravel Breeze
 - **Testing:** Pest PHP
 - **Assets:** Vite
+- **PDF Generation:** barryvdh/laravel-dompdf
+- **Email:** Laravel Mail
 
 ## Requisitos
 
@@ -64,6 +74,7 @@ cd ventaplus
 2. Instalar dependencias de PHP:
 ```bash
 composer install
+composer require barryvdh/laravel-dompdf
 ```
 
 3. Instalar dependencias de Node.js:
@@ -122,6 +133,23 @@ El sistema viene con tres usuarios predefinidos:
 
 ## Características
 
+### Gestión de Caja
+
+#### Funcionalidades Principales
+- Apertura de caja con monto inicial
+- Registro de movimientos (entradas/salidas)
+- Cierre de caja con validación de montos
+- Reapertura de cajas (solo administradores)
+- Generación de reportes detallados
+- Historial de cierres anteriores
+
+#### Detalles del Cierre de Caja
+- Desglose de ventas por método de pago (efectivo, tarjeta, transferencia)
+- Cálculo automático de saldo esperado
+- Comparación de monto esperado vs. real
+- Justificación obligatoria de diferencias
+- Impresión de reportes de cierre
+
 ### Registro de Ventas (POS)
 
 #### Funcionalidades Principales
@@ -130,6 +158,16 @@ El sistema viene con tres usuarios predefinidos:
 - Agregado de múltiples productos a la venta
 - Control automático de inventario
 - Selección de diferentes métodos de pago (efectivo, tarjeta, transferencia)
+
+### Generación de Comprobantes
+
+#### Funcionalidades
+- Generación automática de comprobantes en formato PDF
+- Opciones para imprimir o enviar por email
+- Posibilidad de omitir el comprobante
+- Soporte para pagos en efectivo con cálculo de cambio
+- Vista previa del PDF mediante stream
+- Plantillas HTML personalizadas para el comprobante y para correos
 - Cálculo automático de cambio para pagos en efectivo
 - Generación de comprobantes de venta
 - Vista previa de venta antes de finalizar
@@ -238,12 +276,73 @@ El módulo de registro de ventas ha sido diseñado para ser intuitivo y eficient
 - Diseño responsive
 
 ### Otras Características
-- Gestión de ventas
-- Control de inventario
-- Gestión de clientes
-- Reportes y estadísticas
-- Control de cajas
+- Gestión de ventas con interfaz intuitiva
+- Control de inventario en tiempo real
+- Gestión de clientes con historial de compras
+- Reportes y estadísticas detallados
+- Control de cajas con validación de montos
 - Sistema de cotizaciones
+- Comprobantes de compra personalizables
+- Navegación sencilla con botones para volver al dashboard
+
+### Comprobantes de Compra
+
+#### Funcionalidades
+- Generación automática de comprobantes al finalizar una venta
+- Opciones para imprimir o enviar por correo electrónico
+- Posibilidad de omitir la generación del comprobante
+- Formato PDF profesional con toda la información de la venta
+- Reimpresión de comprobantes para ventas anteriores
+- Autocompletado de correo para clientes registrados
+- En pagos en efectivo, se muestra el cambio a devolver
+
+#### Información del Comprobante
+- Número único de venta
+- Fecha y hora de la transacción
+- Información del cajero
+- Lista detallada de productos comprados
+- Precios unitarios y cantidades
+- Subtotal de la compra
+- Descuentos aplicados
+- Total final
+- En pagos en efectivo: monto entregado y cambio
+
+#### Librerías y Configuración
+
+##### Generación de PDFs
+Se utiliza la librería `barryvdh/laravel-dompdf` para generar comprobantes en formato PDF:
+
+```bash
+composer require barryvdh/laravel-dompdf
+```
+
+Esta librería permite:
+- Generar PDFs a partir de plantillas Blade
+- Personalizar cabeceras, pie de página y estilos
+- Entregar los PDFs como descargas o visualización en el navegador
+- Guardar los PDFs en el servidor
+
+##### Envío de Correos Electrónicos
+Para el envío de comprobantes por correo, se utiliza el sistema de correo de Laravel. Es necesario configurar las credenciales SMTP en el archivo `.env`:
+
+```
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.ejemplo.com
+MAIL_PORT=587
+MAIL_USERNAME=tu_usuario
+MAIL_PASSWORD=tu_contraseña
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=comprobantes@ventasplus.com
+MAIL_FROM_NAME="VentasPlus"
+```
+
+##### Almacenamiento Temporal
+Los comprobantes generados para envío por correo se almacenan temporalmente en:
+```
+storage/app/public/comprobantes/
+```
+
+Asegúrate de que esta carpeta existe y tiene permisos de escritura.
 
 ## Tests
 
@@ -417,3 +516,32 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Solución de Problemas Comunes
+
+### Error 404 en el botón de Logout
+Si experimentas un error 404 al hacer clic en el botón de Logout, verifica que las rutas de autenticación estén correctamente definidas en el archivo `routes/auth.php` y que los componentes de layout estén utilizando `route('logout')` en lugar de `$page.props.ziggy.routes.logout`.
+
+### Problemas con las migraciones
+Si encuentras errores al ejecutar las migraciones, asegúrate de que:
+- La base de datos existe y está correctamente configurada en el archivo `.env`
+- El usuario tiene permisos suficientes para crear tablas y modificar la base de datos
+- Ejecuta `php artisan migrate:status` para verificar el estado de las migraciones
+
+### Errores de JavaScript o Vue.js
+Si encuentras errores en la consola del navegador relacionados con Vue.js:
+- Asegúrate de haber ejecutado `npm install` y `npm run dev` o `npm run build`
+- Limpia la caché del navegador
+- Verifica que Vite esté ejecutándose correctamente
+
+### Problemas con la generación de PDFs
+Si tienes problemas con la generación de comprobantes en PDF:
+- Verifica que la librería `barryvdh/laravel-dompdf` esté instalada correctamente
+- Asegúrate de que las plantillas HTML estén correctamente formateadas
+- Revisa los permisos de escritura en el directorio temporal donde se almacenan los PDFs
+
+### Problemas con el envío de correos
+Si los correos no se envían correctamente:
+- Verifica la configuración de correo en el archivo `.env`
+- Considera usar servicios como Mailtrap para pruebas en desarrollo
+- Ejecuta `php artisan queue:work` si estás utilizando colas para el envío de correos

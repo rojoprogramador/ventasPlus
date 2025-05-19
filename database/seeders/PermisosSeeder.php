@@ -50,6 +50,11 @@ class PermisosSeeder extends Seeder
         ]);
 
         \App\Models\Permiso::create([
+            'nombre' => 'aplicar_descuentos',
+            'descripcion' => 'Aplicar descuentos en ventas'
+        ]);
+
+        \App\Models\Permiso::create([
             'nombre' => 'gestion_cotizaciones',
             'descripcion' => 'Gestionar cotizaciones'
         ]);

@@ -32,6 +32,10 @@ class Producto extends Model
         'categoria_id',
         'imagen',
         'estado',
+        'precio_promocional',
+        'fecha_inicio_promocion',
+        'fecha_fin_promocion',
+        'permite_descuentos',
     ];
 
     /**
@@ -42,10 +46,39 @@ class Producto extends Model
     protected $casts = [
         'precio_venta' => 'decimal:2',
         'precio_compra' => 'decimal:2',
+        'precio_promocional' => 'decimal:2',
         'stock' => 'integer',
         'stock_minimo' => 'integer',
         'estado' => 'boolean',
+        'permite_descuentos' => 'boolean',
+        'fecha_inicio_promocion' => 'datetime',
+        'fecha_fin_promocion' => 'datetime',
     ];
+
+    /**
+     * Verifica si el producto tiene una promoción activa.
+     *
+     * @return bool
+     */
+    public function tienePromocionActiva(): bool
+    {
+        return $this->precio_promocional !== null &&
+               now() >= $this->fecha_inicio_promocion &&
+               now() <= $this->fecha_fin_promocion;
+    }
+
+    /**
+     * Obtiene el precio actual del producto (considerando promoción si aplica).
+     *
+     * @return float
+     */
+    public function getPrecioActual(): float
+    {
+        if ($this->tienePromocionActiva()) {
+            return $this->precio_promocional;
+        }
+        return $this->precio_venta;
+    }
 
     /**
      * Get the categoria that owns the producto.
