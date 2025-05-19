@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VentaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -56,6 +57,13 @@ Route::middleware('auth')->group(function () {
             Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         });
     });
+
+    // Rutas para el registro de ventas
+    Route::get('/ventas/registro', [VentaController::class, 'index'])->name('ventas.registro');
+    Route::get('/ventas/buscar-productos', [VentaController::class, 'buscarProductos'])->name('ventas.buscar-productos');
+    Route::post('/ventas', [VentaController::class, 'store'])->name('ventas.store');
+    Route::get('/ventas/comprobante/{id}', [VentaController::class, 'comprobante'])->name('ventas.comprobante');
+    Route::post('/ventas/cancelar', [VentaController::class, 'cancelar'])->name('ventas.cancelar');
 });
 
 require __DIR__.'/auth.php';

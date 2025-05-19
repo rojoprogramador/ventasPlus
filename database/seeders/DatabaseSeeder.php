@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             PermisosSeeder::class,
             RolPermisoSeeder::class,
             UsuariosSeeder::class,
+            ProductosSeeder::class,
+            ClientesSeeder::class,
             ConfiguracionSeeder::class
         ]);
     }

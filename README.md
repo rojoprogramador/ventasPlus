@@ -106,30 +106,104 @@ El sistema viene con tres usuarios predefinidos:
    - Email: admin@ventaplus.com
    - Password: admin123
    - Rol: Administrador
+   - Acceso a todas las funciones del sistema
 
 2. **Vendedor**
    - Email: vendedor@ventaplus.com
    - Password: vendedor123
    - Rol: Vendedor
+   - Acceso a: gestión de clientes, consulta de productos
 
 3. **Cajero**
    - Email: cajero@ventaplus.com
    - Password: cajero123
    - Rol: Cajero
-
-- **Administrador**
-  - Email: admin@ventaplus.com
-  - Password: admin123
-
-- **Vendedor**
-  - Email: vendedor@ventaplus.com
-  - Password: vendedor123
-
-- **Cajero**
-  - Email: cajero@ventaplus.com
-  - Password: cajero123
+   - Acceso a: registro de ventas, consulta de productos
 
 ## Características
+
+### Registro de Ventas (POS)
+
+#### Funcionalidades Principales
+- Interfaz intuitiva de registro de ventas
+- Búsqueda rápida de productos por nombre o código de barras
+- Agregado de múltiples productos a la venta
+- Control automático de inventario
+- Selección de diferentes métodos de pago (efectivo, tarjeta, transferencia)
+- Cálculo automático de cambio para pagos en efectivo
+- Generación de comprobantes de venta
+- Vista previa de venta antes de finalizar
+- Opción para cancelar ventas
+- Validaciones para evitar errores (stock disponible, montos correctos)
+
+#### Proceso de Venta
+1. El cajero busca productos por nombre o código
+2. Agrega productos al carrito de la venta
+3. Puede ajustar cantidades o eliminar productos
+4. Selecciona el método de pago
+5. En caso de pago en efectivo, registra el monto recibido
+6. Finaliza la venta
+7. El sistema genera automáticamente un comprobante
+8. El inventario se actualiza en tiempo real
+
+#### Beneficios
+- Reduce tiempos de espera para clientes
+- Minimiza errores humanos
+- Simplifica el proceso de cierre de caja
+- Mejora control de inventario
+- Facilita seguimiento de ventas
+
+## Guía de Uso: Registro de Ventas
+
+El módulo de registro de ventas ha sido diseñado para ser intuitivo y eficiente, cumpliendo con la historia de usuario HU-01 "Como Cajero, necesito registrar una venta rápidamente para agilizar la atención al cliente y reducir tiempos de espera".
+
+### Acceso al Módulo
+
+1. Inicie sesión con un usuario que tenga rol de Cajero o Administrador.
+2. En el menú principal, haga clic en "Registro de Ventas".
+
+### Búsqueda de Productos
+
+1. Utilice el campo de búsqueda para encontrar productos por nombre o código de barras.
+2. Presione Enter o haga clic en el botón "Buscar".
+3. Los resultados aparecerán en una tabla debajo del campo de búsqueda.
+4. Para agregar un producto a la venta, haga clic en el botón "Agregar" junto al producto deseado.
+
+### Gestión del Carrito
+
+1. Los productos agregados aparecerán en la sección "Productos en la venta".
+2. Para cada producto puede:
+   - Ajustar la cantidad utilizando los botones + y - o ingresando un valor directamente.
+   - Eliminar el producto de la venta haciendo clic en "Eliminar".
+3. El sistema automáticamente recalcula el subtotal de cada producto y el total de la venta.
+
+### Proceso de Pago
+
+1. Seleccione el método de pago (Efectivo, Tarjeta o Transferencia).
+2. Si selecciona Efectivo:
+   - Ingrese el monto recibido del cliente.
+   - El sistema calculará automáticamente el cambio a devolver.
+3. El botón "Finalizar Venta" se habilitará una vez que se cumplan las condiciones necesarias (productos agregados y, en caso de efectivo, monto suficiente).
+
+### Finalización de la Venta
+
+1. Al hacer clic en "Finalizar Venta", se procesará la transacción.
+2. Si todo es correcto, se mostrará un mensaje de éxito con la opción de:
+   - Ver el comprobante de venta
+   - Iniciar una nueva venta
+3. Al ver el comprobante, se mostrará un resumen de la venta con todos los productos, cantidades, precios y el total.
+
+### Cancelación de Venta
+
+1. En cualquier momento durante el proceso, puede hacer clic en "Cancelar Venta".
+2. Se solicitará confirmación antes de cancelar la venta.
+3. Al confirmar, se descartarán todos los productos agregados.
+
+## Resolución de Problemas Comunes
+
+- **No se encuentran productos**: Verifique que esté ingresando correctamente el nombre o código. Si persiste, consulte con el administrador para confirmar que el producto existe en el sistema.
+- **Error al finalizar venta**: Asegúrese que hay stock disponible para todos los productos y que el monto recibido (en caso de pago en efectivo) sea igual o mayor al total de la venta.
+- **Cantidad excedida**: El sistema no permitirá agregar más unidades de un producto de las que hay en stock.
 
 ### Gestión de Usuarios y Permisos
 
