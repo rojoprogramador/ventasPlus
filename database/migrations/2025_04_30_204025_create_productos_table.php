@@ -25,6 +25,10 @@ return new class extends Migration
             $table->foreignId('categoria_id')->constrained('categorias');
             $table->string('imagen')->nullable();
             $table->enum('estado', ['activo', 'inactivo'])->default('activo');
+            $table->decimal('precio_promocional', 10, 2)->nullable()->after('precio_venta');
+            $table->timestamp('fecha_inicio_promocion')->nullable()->after('precio_promocional');
+            $table->timestamp('fecha_fin_promocion')->nullable()->after('fecha_inicio_promocion');
+            $table->boolean('permite_descuentos')->default(true)->after('fecha_fin_promocion');
             $table->timestamps();
         });
     }
@@ -37,5 +41,13 @@ return new class extends Migration
     public function down()
     {
         Schema::dropIfExists('productos');
+        Schema::table('productos', function (Blueprint $table) {
+            $table->dropColumn(['precio_promocional', 'fecha_inicio_promocion', 'fecha_fin_promocion', 'permite_descuentos']);
+            $table->dropForeign(['categoria_id']);
+            $table->dropColumn([
+                'codigo', 'nombre', 'descripcion', 'precio_venta', 'precio_compra',
+                'stock', 'stock_minimo', 'categoria_id', 'imagen', 'estado'
+            ]);
+        });
     }
 };

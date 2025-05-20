@@ -6,40 +6,61 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::table('productos', function (Blueprint $table) {
-            $table->string('codigo')->unique()->after('id');
-            $table->string('nombre')->after('codigo');
-            $table->text('descripcion')->nullable()->after('nombre');
-            $table->decimal('precio_venta', 10, 2)->after('descripcion');
-            $table->decimal('precio_compra', 10, 2)->after('precio_venta');
-            $table->integer('stock')->default(0)->after('precio_compra');
-            $table->integer('stock_minimo')->default(0)->after('stock');
-            $table->foreignId('categoria_id')->nullable()->after('stock_minimo')->constrained('categorias')->nullOnDelete();
-            $table->string('imagen')->nullable()->after('categoria_id');
-            $table->boolean('estado')->default(true)->after('imagen');
+            if (!Schema::hasColumn('productos', 'codigo')) {
+                $table->string('codigo');
+            }
+            if (!Schema::hasColumn('productos', 'nombre')) {
+                $table->string('nombre');
+            }
+            if (!Schema::hasColumn('productos', 'descripcion')) {
+                $table->text('descripcion')->nullable();
+            }
+            if (!Schema::hasColumn('productos', 'precio_venta')) {
+                $table->decimal('precio_venta', 10, 2);
+            }
+            if (!Schema::hasColumn('productos', 'precio_compra')) {
+                $table->decimal('precio_compra', 10, 2);
+            }
+            if (!Schema::hasColumn('productos', 'stock')) {
+                $table->integer('stock')->default(0);
+            }
+            if (!Schema::hasColumn('productos', 'stock_minimo')) {
+                $table->integer('stock_minimo')->default(0);
+            }
+            if (!Schema::hasColumn('productos', 'categoria_id')) {
+                $table->foreignId('categoria_id')->nullable()->constrained('categorias');
+            }
+            if (!Schema::hasColumn('productos', 'imagen')) {
+                $table->string('imagen')->nullable();
+            }
+            if (!Schema::hasColumn('productos', 'estado')) {
+                $table->boolean('estado')->default(true);
+            }
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
-        Schema::table('productos', function (Blueprint $table) {
-            $table->dropForeign(['categoria_id']);
-            $table->dropColumn([
-                'codigo', 'nombre', 'descripcion', 'precio_venta', 'precio_compra',
-                'stock', 'stock_minimo', 'categoria_id', 'imagen', 'estado'
-            ]);
-        });
+        if (Schema::hasTable('productos')) {
+            Schema::table('productos', function (Blueprint $table) {
+                $columns = [
+                    'codigo', 'nombre', 'descripcion', 'precio_venta',
+                    'precio_compra', 'stock', 'stock_minimo', 'categoria_id',
+                    'imagen', 'estado'
+                ];
+                
+                foreach ($columns as $column) {
+                    if (Schema::hasColumn('productos', $column)) {
+                        if ($column === 'categoria_id') {
+                            $table->dropForeign(['categoria_id']);
+                        }
+                        $table->dropColumn($column);
+                    }
+                }
+            });
+        }
     }
 };
