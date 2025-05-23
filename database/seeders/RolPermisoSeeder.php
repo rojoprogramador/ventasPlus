@@ -28,6 +28,7 @@ class RolPermisoSeeder extends Seeder
             'gestion_productos' => Permiso::where('nombre', 'gestion_productos')->first()->id,
             'gestion_ventas' => Permiso::where('nombre', 'gestion_ventas')->first()->id,
             'aplicar_descuentos' => Permiso::where('nombre', 'aplicar_descuentos')->first()->id,
+            'exportar_datos' => Permiso::where('nombre', 'exportar_datos')->firstOrCreate(['nombre' => 'exportar_datos', 'descripcion' => 'Permite exportar datos del sistema para análisis'])->id,
         ];
 
         // Asignar permisos al administrador (todos los permisos)

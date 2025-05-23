@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Carbon\Carbon;
 
@@ -32,7 +33,7 @@ class CajaController extends Controller
         return Inertia::render('Caja/Index', [
             'cajaAbierta' => $cajaAbierta,
             'cajasCerradas' => $cajasCerradas,
-            'usuario' => Auth::user()->load('rol'),
+            'usuario' => User::with('rol')->find(Auth::id()),
             'fechaActual' => Carbon::now()->format('Y-m-d H:i:s')
         ]);
     }
@@ -63,11 +64,10 @@ class CajaController extends Controller
                 'fechaActual' => Carbon::now()->format('Y-m-d H:i:s'),
                 'errors' => session('errors') ? session('errors')->getBag('default')->getMessages() : (object)[]
             ]);
-            
-        } catch (\Exception $e) {
+              } catch (\Exception $e) {
             // Registrar el error para diagnóstico
-            \Log::error('Error en la página de apertura de caja: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
+            Log::error('Error en la página de apertura de caja: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
             
             // Redireccionar a la página principal
             return redirect()->route('caja.index')
@@ -124,11 +124,10 @@ class CajaController extends Controller
             
             return redirect()->route('caja.index')
                 ->with('success', 'Caja abierta correctamente.');
-                
-        } catch (\Exception $e) {
+                  } catch (\Exception $e) {
             // Log del error
-            \Log::error('Error al abrir caja: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
+            Log::error('Error al abrir caja: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
             
             return redirect()->back()
                 ->with('error', 'Ocurrió un error al abrir la caja. Por favor, inténtelo de nuevo.');
@@ -182,7 +181,7 @@ class CajaController extends Controller
             'totalEntradas' => $totalEntradas,
             'totalSalidas' => $totalSalidas,
             'saldoEsperado' => $saldoEsperado,
-            'usuario' => Auth::user()->load('rol'),
+            'usuario' => User::with('rol')->find(Auth::id()),
             'fechaActual' => Carbon::now()->format('Y-m-d H:i:s')
         ]);
     }
@@ -315,7 +314,7 @@ class CajaController extends Controller
             'totalSalidas' => $totalSalidas,
             'saldoEsperado' => $saldoEsperado,
             'diferencia' => $diferencia,
-            'usuario' => Auth::user()->load('rol'),
+            'usuario' => User::with('rol')->find(Auth::id()),
         ]);
     }
     

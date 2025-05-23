@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Producto;
 
@@ -50,10 +51,9 @@ class ProductoController extends Controller
                 ];
             });
             
-            return response()->json($transformed);
-        } catch (\Exception $e) {
+            return response()->json($transformed);        } catch (\Exception $e) {
             // Log error for debugging
-            \Log::error('Error in ProductoController@index: ' . $e->getMessage());
+            Log::error('Error in ProductoController@index: ' . $e->getMessage());
             
             // Return an empty array with 200 status to prevent frontend errors
             return response()->json([], 200);

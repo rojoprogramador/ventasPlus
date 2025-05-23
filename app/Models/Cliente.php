@@ -26,8 +26,8 @@ class Cliente extends Model
         'telefono',
         'email',
         'direccion',
-        'identificacion',
-        'tipo_identificacion',
+        'documento',
+        'tipo_documento',
         'estado',
     ];
 
@@ -38,7 +38,7 @@ class Cliente extends Model
      */
     protected $casts = [
         'fecha_registro' => 'datetime',
-        'estado' => 'boolean',
+        // No se castea estado a booleano, ya que es un enum en la migración
     ];
 
     /**

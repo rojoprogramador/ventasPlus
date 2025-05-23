@@ -25,9 +25,7 @@ const tieneAlgunPermiso = (permisos) => {
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Panel de Administración</h2>
-        </template>
-
-        <div class="py-12">
+        </template>        <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <!-- Información del usuario -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
@@ -44,7 +42,7 @@ const tieneAlgunPermiso = (permisos) => {
                         <div class="p-6">
                             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Ventas</h3>
                             <div class="space-y-3">
-                                <Link href="/ventas/nueva"
+                                <Link :href="route('ventas.registro')"
                                       class="flex items-center p-3 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors">
                                     <div class="flex-1">
                                         <h4 class="font-medium">Nueva Venta</h4>
@@ -66,7 +64,7 @@ const tieneAlgunPermiso = (permisos) => {
                             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Administración</h3>
                             <div class="space-y-3">
                                 <Link v-if="tienePermiso('gestion_roles')"
-                                      href="/roles"
+                                      :href="route('roles.index')"
                                       class="flex items-center p-3 bg-indigo-50 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800 transition-colors">
                                     <div>
                                         <h4 class="font-semibold">Roles</h4>
@@ -74,11 +72,18 @@ const tieneAlgunPermiso = (permisos) => {
                                     </div>
                                 </Link>
                                 <Link v-if="tienePermiso('gestion_usuarios')"
-                                      href="/users"
+                                      :href="route('users.index')"
                                       class="flex items-center p-3 bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-200 rounded-lg hover:bg-green-100 dark:hover:bg-green-800 transition-colors">
                                     <div>
                                         <h4 class="font-semibold">Usuarios</h4>
                                         <p class="text-sm">Gestionar usuarios del sistema</p>
+                                    </div>
+                                </Link>                                <Link v-if="tienePermiso('exportar_datos')"
+                                      :href="route('exportacion.index')"
+                                      class="flex items-center p-3 bg-purple-50 dark:bg-purple-900 text-purple-700 dark:text-purple-200 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-800 transition-colors">
+                                    <div>
+                                        <h4 class="font-semibold">Exportación de Datos</h4>
+                                        <p class="text-sm">Exportar información para análisis</p>
                                     </div>
                                 </Link>
                             </div>
@@ -92,7 +97,7 @@ const tieneAlgunPermiso = (permisos) => {
                             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Ventas</h3>
                             <div class="space-y-3">
                                 <Link v-if="tienePermiso('gestion_ventas')"
-                                      href="/ventas"
+                                      :href="route('ventas.index')"
                                       class="flex items-center p-3 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors">
                                     <div>
                                         <h4 class="font-semibold">Ventas</h4>
@@ -100,7 +105,7 @@ const tieneAlgunPermiso = (permisos) => {
                                     </div>
                                 </Link>
                                 <Link v-if="tienePermiso('gestion_clientes')"
-                                      href="/clientes"
+                                      :href="route('clientes.index')"
                                       class="flex items-center p-3 bg-purple-50 dark:bg-purple-900 text-purple-700 dark:text-purple-200 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-800 transition-colors">
                                     <div>
                                         <h4 class="font-semibold">Clientes</h4>
@@ -117,7 +122,7 @@ const tieneAlgunPermiso = (permisos) => {
                         <div class="p-6">
                             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Inventario</h3>
                             <div class="space-y-3">
-                                <Link href="/productos"
+                                <Link :href="route('productos.index')"
                                       class="flex items-center p-3 bg-amber-50 dark:bg-amber-900 text-amber-700 dark:text-amber-200 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-800 transition-colors">
                                     <div>
                                         <h4 class="font-semibold">Productos</h4>

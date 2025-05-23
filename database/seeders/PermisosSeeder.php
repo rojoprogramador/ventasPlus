@@ -52,9 +52,7 @@ class PermisosSeeder extends Seeder
         \App\Models\Permiso::create([
             'nombre' => 'aplicar_descuentos',
             'descripcion' => 'Aplicar descuentos en ventas'
-        ]);
-
-        \App\Models\Permiso::create([
+        ]);        \App\Models\Permiso::create([
             'nombre' => 'gestion_cotizaciones',
             'descripcion' => 'Gestionar cotizaciones'
         ]);
@@ -62,6 +60,12 @@ class PermisosSeeder extends Seeder
         \App\Models\Permiso::create([
             'nombre' => 'gestion_caja',
             'descripcion' => 'Gestionar caja'
+        ]);
+
+        // Añadir permiso de exportación de datos
+        \App\Models\Permiso::create([
+            'nombre' => 'exportar_datos',
+            'descripcion' => 'Permite exportar datos del sistema para análisis'
         ]);
     }
 }

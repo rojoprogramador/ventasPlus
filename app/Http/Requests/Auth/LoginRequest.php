@@ -5,6 +5,7 @@ namespace App\Http\Requests\Auth;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -41,15 +42,42 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        try {
+            if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+                RateLimiter::hit($this->throttleKey());
 
+                throw ValidationException::withMessages([
+                    'email' => trans('auth.failed'),
+                ]);
+            }
+
+            // Verificar que el usuario está activo
+            $user = Auth::user();
+            if ($user && isset($user->estado) && $user->estado === false) {
+                Auth::logout();
+                
+                // Limpiar la sesión
+                $this->session()->invalidate();
+                $this->session()->regenerateToken();
+                
+                throw ValidationException::withMessages([
+                    'email' => 'Esta cuenta está desactivada. Contacte al administrador.',
+                ]);
+            }
+
+            RateLimiter::clear($this->throttleKey());
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            // Registrar cualquier otro error inesperado
+            Log::error('Error inesperado durante la autenticación: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => 'Error al iniciar sesión. Por favor, inténtelo de nuevo más tarde.',
             ]);
         }
-
-        RateLimiter::clear($this->throttleKey());
     }
 
     /**

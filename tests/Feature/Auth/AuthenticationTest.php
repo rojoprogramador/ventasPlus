@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Rol;
 use App\Providers\RouteServiceProvider;
 
 test('login screen can be rendered', function () {
@@ -10,7 +11,16 @@ test('login screen can be rendered', function () {
 });
 
 test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+    // Crear un rol antes de crear el usuario
+    $rol = Rol::firstOrCreate(
+        ['nombre' => 'admin'],
+        ['descripcion' => 'Administrador']
+    );
+    
+    $user = User::factory()->create([
+        'password' => bcrypt('password'),
+        'rol_id' => $rol->id
+    ]);
 
     $response = $this->post('/login', [
         'email' => $user->email,
@@ -22,7 +32,15 @@ test('users can authenticate using the login screen', function () {
 });
 
 test('users can not authenticate with invalid password', function () {
-    $user = User::factory()->create();
+    // Crear un rol antes de crear el usuario
+    $rol = Rol::firstOrCreate(
+        ['nombre' => 'admin'],
+        ['descripcion' => 'Administrador']
+    );
+    
+    $user = User::factory()->create([
+        'rol_id' => $rol->id
+    ]);
 
     $this->post('/login', [
         'email' => $user->email,

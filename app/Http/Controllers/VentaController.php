@@ -28,6 +28,22 @@ class VentaController extends Controller
             'clientes' => Cliente::where('estado', 'activo')->get()
         ]);
     }
+    
+    /**
+     * Muestra la lista de ventas realizadas
+     *
+     * @return \Inertia\Response
+     */
+    public function listar()
+    {
+        $ventas = Venta::with(['cliente', 'usuario'])
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(15);
+        
+        return Inertia::render('Ventas/Index', [
+            'ventas' => $ventas
+        ]);
+    }
 
     /**
      * Busca productos por nombre o código de barras
@@ -277,7 +293,7 @@ class VentaController extends Controller
             return $pdf->stream($nombreArchivo);
         } catch (\Exception $e) {
             // Log el error
-            \Log::error('Error al generar comprobante: ' . $e->getMessage());
+            Log::error('Error al generar comprobante: ' . $e->getMessage());
             
             // Retornar el error
             return response()->json(['error' => 'Error al generar comprobante: ' . $e->getMessage()], 500);

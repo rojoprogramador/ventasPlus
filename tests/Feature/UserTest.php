@@ -6,6 +6,8 @@ use Tests\TestCase;
 use App\Models\Rol;
 use App\Models\User;
 use App\Models\Permiso;
+use Tests\Helpers\TestHelper;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
@@ -37,18 +39,10 @@ class UserTest extends TestCase
     {
         parent::setUp();
         
-        // Crear rol admin y permiso de gestión de usuarios
-        $this->rolAdmin = Rol::create(['nombre' => 'admin', 'descripcion' => 'Administrador']);
-        $permisoUsuarios = Permiso::create(['nombre' => 'gestion_usuarios', 'descripcion' => 'Gestionar usuarios']);
-        $this->rolAdmin->permisos()->attach($permisoUsuarios->id);
-
-        // Crear usuario admin
-        $this->admin = User::create([
-            'name' => 'Admin Test',
-            'email' => 'admin@test.com',
-            'password' => bcrypt('password'),
-            'rol_id' => $this->rolAdmin->id
-        ]);
+        // Usar el helper para configurar el entorno de prueba
+        $entorno = TestHelper::prepararEntornoPruebas();
+        $this->rolAdmin = $entorno['rolAdmin'];
+        $this->admin = $entorno['admin'];
     }
 
     /**
@@ -82,14 +76,18 @@ class UserTest extends TestCase
      */
     public function test_admin_puede_crear_usuario()
     {
-        // Crear rol vendedor para el nuevo usuario
-        $rolVendedor = Rol::create(['nombre' => 'vendedor', 'descripcion' => 'Vendedor']);
+        // Obtener rol vendedor para el nuevo usuario
+        $rolVendedor = Rol::firstOrCreate(
+            ['nombre' => 'vendedor'],
+            ['descripcion' => 'Vendedor']
+        );
 
         // Datos del nuevo usuario a crear
         $nuevoUsuario = [
             'name' => 'Nuevo Vendedor',
             'email' => 'vendedor@test.com',
-            'password' => 'password',
+            'password' => 'Password123!', // Cumple con requisitos de seguridad comunes
+            'password_confirmation' => 'Password123!',
             'rol_id' => $rolVendedor->id
         ];
 
@@ -100,7 +98,7 @@ class UserTest extends TestCase
         // 1. La respuesta redirecciona (éxito)
         // 2. El usuario existe en la base de datos con los datos correctos
         // 3. El rol está asignado correctamente
-        $response->assertRedirect();
+        $response->assertStatus(302); // Asegurarse que hay redirección
         $this->assertDatabaseHas('users', [
             'name' => 'Nuevo Vendedor',
             'email' => 'vendedor@test.com',
@@ -109,7 +107,7 @@ class UserTest extends TestCase
 
         // Verificar que el password se hashó correctamente
         $usuarioCreado = User::where('email', 'vendedor@test.com')->first();
-        $this->assertTrue(password_verify('password', $usuarioCreado->password));
+        $this->assertTrue(Hash::check('Password123!', $usuarioCreado->password));
     }
 
     /**

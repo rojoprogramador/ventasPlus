@@ -5,6 +5,9 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\DescuentoController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\ExportacionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -27,7 +30,7 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [
         'auth' => [
-            'user' => auth()->user()->load('rol')
+            'user' => auth()->user()->load('rol.permisos')
         ]
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -69,6 +72,25 @@ Route::middleware('auth')->group(function () {
     Route::post('/ventas', [VentaController::class, 'store'])->name('ventas.store');
     Route::get('/ventas/comprobante/{id}', [VentaController::class, 'comprobante'])->name('ventas.comprobante');
     Route::post('/ventas/cancelar', [VentaController::class, 'cancelar'])->name('ventas.cancelar');
+    
+    // Rutas para la gestión de clientes
+    Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
+    Route::get('/clientes/buscar', [ClienteController::class, 'buscar'])->name('clientes.buscar');
+    Route::post('/clientes/guardar-rapido', [ClienteController::class, 'guardarRapido'])->name('clientes.guardar-rapido');
+    Route::get('/clientes/detalles/{id}', [ClienteController::class, 'obtenerDetalles'])->name('clientes.detalles');
+    Route::put('/clientes/{id}', [ClienteController::class, 'actualizar'])->name('clientes.actualizar');
+    
+    // Rutas para la gestión de productos
+    Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
+    
+    // Rutas para la gestión de ventas
+    Route::get('/ventas', [VentaController::class, 'listar'])->name('ventas.index');
+    
+    // Rutas para la exportación de datos
+    Route::middleware(['permiso:exportar_datos'])->group(function () {
+        Route::get('/exportacion', [ExportacionController::class, 'index'])->name('exportacion.index');
+        Route::post('/exportacion/exportar', [ExportacionController::class, 'exportar'])->name('exportacion.exportar');
+    });
 });
 
 require __DIR__.'/auth.php';

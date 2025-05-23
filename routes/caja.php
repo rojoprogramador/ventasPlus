@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
     // Grupo de rutas para la gestión de caja - Accesible para administradores o usuarios con permiso específico
-    Route::group(['middleware' => ['auth'], 'namespace' => 'App\Http\Controllers'], function () {
+    Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::get('/caja', [CajaController::class, 'index'])->name('caja.index');
         Route::get('/caja/create', [CajaController::class, 'create'])->name('caja.create');
         Route::post('/caja', [CajaController::class, 'store'])->name('caja.store');
