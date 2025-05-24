@@ -121,11 +121,11 @@
               <label for="busqueda" class="block mb-2 text-sm font-medium text-gray-700">
                 Buscar producto (por nombre o código de barras)
               </label>
-              <div class="flex">
-                <input 
+              <div class="flex">                <input 
                   type="text" 
                   id="busqueda" 
                   v-model="busqueda" 
+                  @input="busquedaReactiva"
                   @keyup.enter="buscarProductos"
                   class="flex-1 p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                   :class="{'border-red-500': errorBusqueda}"
@@ -570,6 +570,7 @@ import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { debounce } from 'lodash';
 
 // Variables reactivas
 const busqueda = ref('');
@@ -655,6 +656,17 @@ const buscarProductos = async () => {
     errorBusqueda.value = 'Error al buscar productos';
   }
 };
+
+// Función para búsqueda reactiva mientras se escribe (debounce de 300ms)
+const busquedaReactiva = debounce(() => {
+  if (busqueda.value && busqueda.value.length >= 2) {
+    errorBusqueda.value = '';
+    buscarProductos();
+  } else if (busqueda.value.length === 0) {
+    productosEncontrados.value = [];
+    errorBusqueda.value = '';
+  }
+}, 300);
 
 const agregarAlCarrito = (producto) => {
   // Verificar si el producto ya está en el carrito

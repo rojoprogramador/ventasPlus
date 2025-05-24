@@ -21,9 +21,9 @@ class DatabaseSeeder extends Seeder
             ConfiguracionSeeder::class,
             CategoriaSeeder::class,
             ProductoSeeder::class,
-            ProductosSeeder::class,
+            // ProductosSeeder::class,  // Comentado para evitar conflictos con códigos duplicados
             ClientesSeeder::class,
-            ExportarDatosPermisoSeeder::class
+            // ExportarDatosPermisoSeeder::class  // Comentado porque el permiso ya está en PermisosSeeder
         ]);
     }
 }

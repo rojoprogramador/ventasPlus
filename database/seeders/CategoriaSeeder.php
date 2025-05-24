@@ -13,27 +13,26 @@ class CategoriaSeeder extends Seeder
      * @return void
      */
     public function run()
-    {
-        $categorias = [
+    {        $categorias = [
             [
                 'nombre' => 'Electrónicos',
                 'descripcion' => 'Productos electrónicos y tecnológicos',
-                'estado' => true,
+                'estado' => 'activo',
             ],
             [
                 'nombre' => 'Hogar',
                 'descripcion' => 'Productos para el hogar',
-                'estado' => true,
+                'estado' => 'activo',
             ],
             [
                 'nombre' => 'Ropa',
                 'descripcion' => 'Prendas de vestir y accesorios',
-                'estado' => true,
+                'estado' => 'activo',
             ],
             [
                 'nombre' => 'Alimentos',
                 'descripcion' => 'Productos alimenticios',
-                'estado' => true,
+                'estado' => 'activo',
             ],
         ];
 

@@ -25,15 +25,13 @@ class Categoria extends Model
         'nombre',
         'descripcion',
         'estado',
-    ];
-
-    /**
+    ];    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
      */
     protected $casts = [
-        'estado' => 'boolean',
+        // No es necesario hacer cast para 'estado' ya que es un enum en la base de datos
     ];
 
     /**
