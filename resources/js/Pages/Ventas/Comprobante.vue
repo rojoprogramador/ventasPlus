@@ -44,6 +44,7 @@
                       <th class="px-4 py-2 text-left">Producto</th>
                       <th class="px-4 py-2 text-center">Cantidad</th>
                       <th class="px-4 py-2 text-right">Precio Unit.</th>
+                      <th class="px-4 py-2 text-right">Descuento</th>
                       <th class="px-4 py-2 text-right">Subtotal</th>
                     </tr>
                   </thead>
@@ -52,21 +53,36 @@
                       <td class="px-4 py-2">{{ detalle.producto ? detalle.producto.nombre : 'Producto no disponible' }}</td>
                       <td class="px-4 py-2 text-center">{{ detalle.cantidad }}</td>
                       <td class="px-4 py-2 text-right">${{ formatNumero(detalle.precio) }}</td>
+                      <td class="px-4 py-2 text-right">
+                        <template v-if="detalle.descuento > 0">
+                          {{ detalle.tipo_descuento === 'porcentaje' ? `${detalle.descuento}%` : `$${formatNumero(detalle.descuento)}` }}
+                        </template>
+                        <template v-else>-</template>
+                      </td>
                       <td class="px-4 py-2 text-right">${{ formatNumero(detalle.subtotal) }}</td>
                     </tr>
                   </tbody>
                   <tfoot class="bg-gray-50">
                     <tr>
-                      <td colspan="3" class="px-4 py-2 text-right font-bold">Subtotal:</td>
-                      <td class="px-4 py-2 text-right">${{ formatNumero(venta.subtotal) }}</td>
+                      <td colspan="4" class="px-4 py-2 text-right font-bold">Subtotal sin descuentos:</td>
+                      <td class="px-4 py-2 text-right">${{ formatNumero(venta.subtotal + (venta.descuentos || 0)) }}</td>
+                    </tr>
+                    <tr v-if="venta.descuentos > 0">
+                      <td colspan="4" class="px-4 py-2 text-right font-bold text-red-600">Descuentos totales:</td>
+                      <td class="px-4 py-2 text-right text-red-600">-${{ formatNumero(venta.descuentos) }}</td>
                     </tr>
                     <tr>
-                      <td colspan="3" class="px-4 py-2 text-right font-bold">Impuesto (16%):</td>
-                      <td class="px-4 py-2 text-right">${{ formatNumero(venta.impuesto) }}</td>
-                    </tr>
-                    <tr>
-                      <td colspan="3" class="px-4 py-2 text-right font-bold text-lg">Total:</td>
+                      <td colspan="4" class="px-4 py-2 text-right font-bold text-lg">Total Final:</td>
                       <td class="px-4 py-2 text-right font-bold text-lg">${{ formatNumero(venta.total) }}</td>
+                    </tr>
+                    <!-- Mostrar información del pago en efectivo si aplica -->
+                    <tr v-if="venta.tipo_pago === 'efectivo' && venta.monto_recibido">
+                      <td colspan="4" class="px-4 py-2 text-right">Monto recibido:</td>
+                      <td class="px-4 py-2 text-right">${{ formatNumero(venta.monto_recibido) }}</td>
+                    </tr>
+                    <tr v-if="venta.tipo_pago === 'efectivo' && venta.monto_recibido">
+                      <td colspan="4" class="px-4 py-2 text-right">Cambio:</td>
+                      <td class="px-4 py-2 text-right">${{ formatNumero(venta.monto_recibido - venta.total) }}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -120,33 +136,24 @@ const props = defineProps({
 });
 
 // Funciones de formato
-const formatFecha = (fecha) => {
-  if (!fecha) return '';
-  const date = new Date(fecha);
-  return new Intl.DateTimeFormat('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
+const formatNumero = (valor) => {
+  const numero = parseFloat(valor);
+  return isNaN(numero) ? '0.00' : numero.toFixed(2);
 };
 
-const formatNumero = (numero) => {
-  return Number(numero).toLocaleString('es-CO', { 
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+const formatFecha = (fecha) => {
+  if (!fecha) return '';
+  return new Date(fecha).toLocaleString();
 };
 
 const formatTipoPago = (tipo) => {
+  if (!tipo) return 'No especificado';
   const tipos = {
-    'efectivo': 'Efectivo',
-    'tarjeta': 'Tarjeta',
-    'transferencia': 'Transferencia'
+    efectivo: 'Efectivo',
+    tarjeta: 'Tarjeta',
+    transferencia: 'Transferencia'
   };
-  
-  return tipos[tipo] || tipo;
+  return tipos[tipo.toLowerCase()] || tipo;
 };
 
 // Métodos

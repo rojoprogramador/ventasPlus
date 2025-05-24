@@ -32,7 +32,7 @@
                     <td class="px-4 py-2 border-b">{{ venta.id }}</td>
                     <td class="px-4 py-2 border-b">{{ formatDate(venta.created_at) }}</td>
                     <td class="px-4 py-2 border-b">{{ venta.cliente ? venta.cliente.nombre : 'Cliente no registrado' }}</td>
-                    <td class="px-4 py-2 border-b">${{ venta.total.toFixed(2) }}</td>
+                    <td class="px-4 py-2 border-b">${{ venta.total ? Number(venta.total).toFixed(2) : '0.00' }}</td>
                     <td class="px-4 py-2 border-b">
                       <span 
                         :class="{

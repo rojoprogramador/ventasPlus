@@ -193,38 +193,76 @@
                       <th class="px-4 py-2 text-left">Nombre</th>
                       <th class="px-4 py-2 text-left">Precio</th>
                       <th class="px-4 py-2 text-left">Cantidad</th>
+                      <th class="px-4 py-2 text-left">Descuento</th>
                       <th class="px-4 py-2 text-left">Subtotal</th>
                       <th class="px-4 py-2 text-left">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
+                    <!-- Resumen del producto en el carrito -->
                     <tr v-for="(item, index) in carrito" :key="index" class="border-b hover:bg-gray-50">
                       <td class="px-4 py-2">{{ item.codigo }}</td>
                       <td class="px-4 py-2">{{ item.nombre }}</td>
-                      <td class="px-4 py-2">${{ item.precio_venta }}</td>
+                      <td class="px-4 py-2">${{ formatearNumero(item.precio_venta) }}</td>
                       <td class="px-4 py-2">
                         <div class="flex items-center">
                           <button 
-                            @click="disminuirCantidad(index)" 
-                            class="px-2 py-1 text-white bg-gray-500 rounded-l hover:bg-gray-600"
+                            @click="decrementarCantidad(index)"
                             :disabled="item.cantidad <= 1"
+                            class="px-2 py-1 text-gray-600 border rounded-l hover:bg-gray-100"
                           >-</button>
                           <input 
                             type="number" 
-                            v-model.number="item.cantidad" 
-                            min="1" 
-                            :max="item.stock"
-                            class="w-16 px-2 py-1 text-center border"
+                            v-model.number="item.cantidad"
                             @change="validarCantidad(index)"
+                            class="w-16 px-2 py-1 text-center border-t border-b"
+                            min="1"
+                            :max="item.stock"
                           />
                           <button 
-                            @click="aumentarCantidad(index)" 
-                            class="px-2 py-1 text-white bg-gray-500 rounded-r hover:bg-gray-600"
+                            @click="incrementarCantidad(index)"
                             :disabled="item.cantidad >= item.stock"
+                            class="px-2 py-1 text-gray-600 border rounded-r hover:bg-gray-100"
                           >+</button>
                         </div>
                       </td>
-                      <td class="px-4 py-2">${{ (item.precio_venta * item.cantidad).toFixed(2) }}</td>
+                      <td class="px-4 py-2">
+                        <div class="flex flex-col space-y-2">
+                          <div class="flex items-center space-x-2">
+                            <input 
+                              type="number" 
+                              v-model.number="item.descuento"
+                              class="w-20 px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500"
+                              :class="{'border-red-500': descuentoErrores[index]}"
+                              placeholder="0"
+                              min="0"
+                              :max="item.tipo_descuento === 'porcentaje' ? 100 : calcularSubtotalSinDescuento(item)"
+                              step="0.01"
+                              @change="validarDescuento(index)"
+                            />
+                            <select 
+                              v-model="item.tipo_descuento"
+                              class="px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500"
+                              @change="validarDescuento(index)"
+                            >
+                              <option value="porcentaje">%</option>
+                              <option value="monto">$</option>
+                            </select>
+                          </div>
+                          <!-- Error message -->
+                          <div v-if="descuentoErrores[index]" class="text-sm text-red-600">
+                            {{ descuentoErrores[index] }}
+                          </div>
+                          <!-- Preview del descuento -->
+                          <div v-else-if="item.descuento > 0" class="text-sm text-gray-600">
+                            Descuento: 
+                            <span class="font-medium text-green-600">
+                              -${{ formatearNumero(calcularDescuentoItem(item)) }}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-4 py-2">${{ calcularSubtotalItem(item).toFixed(2) }}</td>
                       <td class="px-4 py-2">
                         <button 
                           @click="eliminarDelCarrito(index)" 
@@ -237,8 +275,18 @@
                   </tbody>
                   <tfoot class="bg-gray-50">
                     <tr>
-                      <td colspan="4" class="px-4 py-2 text-right font-bold">Total:</td>
-                      <td class="px-4 py-2 font-bold">${{ calcularTotal().toFixed(2) }}</td>
+                      <td colspan="5" class="px-4 py-2 text-right font-bold">Subtotal:</td>
+                      <td class="px-4 py-2 font-bold">${{ formatearNumero(calcularTotalSinDescuento()) }}</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td colspan="5" class="px-4 py-2 text-right font-bold text-red-600">Descuentos:</td>
+                      <td class="px-4 py-2 font-bold text-red-600">-${{ formatearNumero(calcularDescuentoTotal()) }}</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td colspan="5" class="px-4 py-2 text-right font-bold text-lg">Total:</td>
+                      <td class="px-4 py-2 font-bold text-lg">${{ formatearNumero(calcularTotal()) }}</td>
                       <td></td>
                     </tr>
                   </tfoot>
@@ -280,9 +328,9 @@
                   />
                 </div>
                 
-                <div v-if="montoRecibido >= calcularTotal()" class="mt-2">
+                <div v-if="montoRecibidoEsSuficiente()" class="mt-2">
                   <p class="font-semibold text-green-600">
-                    Cambio a devolver: ${{ (montoRecibido - calcularTotal()).toFixed(2) }}
+                    Cambio a devolver: ${{ calcularCambio().toFixed(2) }}
                   </p>
                 </div>
                 <div v-else-if="montoRecibido > 0" class="mt-2">
@@ -632,6 +680,65 @@ const puedeFinalizarVenta = computed(() => {
   return true;
 });
 
+// Funciones de cálculo
+const calcularSubtotalSinDescuento = (item) => {
+  return item.precio_venta * item.cantidad;
+};
+
+const calcularDescuentoItem = (item) => {
+  if (!item.descuento || item.descuento <= 0) return 0;
+  
+  const subtotalSinDescuento = calcularSubtotalSinDescuento(item);
+  
+  if (item.tipo_descuento === 'porcentaje') {
+    // Calcular el descuento porcentual con precisión de 2 decimales
+    return Math.round((subtotalSinDescuento * (item.descuento / 100)) * 100) / 100;
+  } else {
+    // Para descuento en monto, asegurar que no exceda el subtotal
+    return Math.min(
+      item.descuento * item.cantidad,
+      subtotalSinDescuento
+    );
+  }
+};
+
+const calcularSubtotalItem = (item) => {
+  const subtotalSinDescuento = calcularSubtotalSinDescuento(item);
+  const descuento = calcularDescuentoItem(item);
+  // Asegurar precisión de 2 decimales
+  return Math.round((subtotalSinDescuento - descuento) * 100) / 100;
+};
+
+const calcularTotalSinDescuento = () => {
+  return carrito.value.reduce((total, item) => {
+    return total + calcularSubtotalSinDescuento(item);
+  }, 0);
+};
+
+const calcularDescuentoTotal = () => {
+  return carrito.value.reduce((total, item) => {
+    return total + calcularDescuentoItem(item);
+  }, 0);
+};
+
+const calcularTotal = () => {
+  const totalSinDescuento = calcularTotalSinDescuento();
+  const descuentoTotal = calcularDescuentoTotal();
+  // Asegurar precisión de 2 decimales
+  return Math.round((totalSinDescuento - descuentoTotal) * 100) / 100;
+};
+
+// Funciones de pago
+const calcularCambio = () => {
+  if (metodoPagoSeleccionado.value !== 'efectivo') return 0;
+  return Number((montoRecibido.value - calcularTotal()).toFixed(2));
+};
+
+const montoRecibidoEsSuficiente = () => {
+  if (metodoPagoSeleccionado.value !== 'efectivo') return true;
+  return montoRecibido.value >= calcularTotal();
+};
+
 // Métodos
 const buscarProductos = async () => {
   if (!busqueda.value) {
@@ -669,62 +776,23 @@ const busquedaReactiva = debounce(() => {
 }, 300);
 
 const agregarAlCarrito = (producto) => {
-  // Verificar si el producto ya está en el carrito
   const indiceExistente = carrito.value.findIndex(item => item.id === producto.id);
   
   if (indiceExistente >= 0) {
-    // Si ya existe, aumentar cantidad si hay stock disponible
     if (carrito.value[indiceExistente].cantidad < producto.stock) {
       carrito.value[indiceExistente].cantidad++;
     }
   } else {
-    // Si no existe, agregarlo con cantidad 1
     carrito.value.push({
       ...producto,
-      cantidad: 1
+      cantidad: 1,
+      descuento: 0,
+      tipo_descuento: 'porcentaje'
     });
   }
   
-  // Limpiar resultados de búsqueda
   productosEncontrados.value = [];
   busqueda.value = '';
-};
-
-const eliminarDelCarrito = (index) => {
-  carrito.value.splice(index, 1);
-};
-
-const aumentarCantidad = (index) => {
-  const item = carrito.value[index];
-  if (item.cantidad < item.stock) {
-    item.cantidad++;
-  }
-};
-
-const disminuirCantidad = (index) => {
-  if (carrito.value[index].cantidad > 1) {
-    carrito.value[index].cantidad--;
-  }
-};
-
-const validarCantidad = (index) => {
-  const item = carrito.value[index];
-  
-  // Asegurar que la cantidad sea un número válido
-  if (isNaN(item.cantidad) || item.cantidad < 1) {
-    item.cantidad = 1;
-  }
-  
-  // Asegurar que no exceda el stock disponible
-  if (item.cantidad > item.stock) {
-    item.cantidad = item.stock;
-  }
-};
-
-const calcularTotal = () => {
-  return carrito.value.reduce((total, item) => {
-    return total + (item.precio_venta * item.cantidad);
-  }, 0);
 };
 
 const confirmarCancelarVenta = () => {
@@ -946,6 +1014,76 @@ const actualizarCliente = async () => {
       erroresClienteEditar.value.general = error.response.data.message;
     } else {
       erroresClienteEditar.value.general = 'Error al actualizar el cliente';
+    }
+  }
+};
+
+const formatearNumero = (valor) => {
+  const numero = parseFloat(valor);
+  return isNaN(numero) ? '0.00' : numero.toFixed(2);
+};
+
+// Funciones para manejar cantidades
+const incrementarCantidad = (index) => {
+  const item = carrito.value[index];
+  if (item.cantidad < item.stock) {
+    item.cantidad++;
+  }
+};
+
+const decrementarCantidad = (index) => {
+  const item = carrito.value[index];
+  if (item.cantidad > 1) {
+    item.cantidad--;
+  }
+};
+
+const validarCantidad = (index) => {
+  const item = carrito.value[index];
+  
+  // Asegurar que la cantidad sea un número
+  item.cantidad = Number(item.cantidad);
+  
+  // Validar límites
+  if (item.cantidad < 1) item.cantidad = 1;
+  if (item.cantidad > item.stock) item.cantidad = item.stock;
+};
+
+// Add reactive state for error messages at the top of the script setup
+const descuentoErrores = ref({});
+
+// Funciones para manejar descuentos
+const validarDescuento = (index) => {
+  const item = carrito.value[index];
+  const subtotalSinDescuento = calcularSubtotalSinDescuento(item);
+  
+  // Limpiar error previo
+  descuentoErrores.value[index] = '';
+  
+  // Asegurar que el descuento sea un número
+  item.descuento = Number(item.descuento) || 0;
+  
+  // Validar límites según el tipo de descuento
+  if (item.tipo_descuento === 'porcentaje') {
+    if (item.descuento < 0) {
+      item.descuento = 0;
+      descuentoErrores.value[index] = 'El descuento no puede ser negativo';
+    } else if (item.descuento > 100) {
+      item.descuento = 100;
+      descuentoErrores.value[index] = 'El descuento no puede superar el 100%';
+    }
+  } else {
+    // Para descuento en monto
+    if (item.descuento < 0) {
+      item.descuento = 0;
+      descuentoErrores.value[index] = 'El descuento no puede ser negativo';
+    } else {
+      // El descuento no puede ser mayor al subtotal del item
+      const maxDescuento = subtotalSinDescuento;
+      if (item.descuento > maxDescuento) {
+        item.descuento = maxDescuento;
+        descuentoErrores.value[index] = `El descuento no puede superar $${formatearNumero(maxDescuento)}`;
+      }
     }
   }
 };

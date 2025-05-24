@@ -47,14 +47,15 @@ class VentaController extends Controller
 
     /**
      * Busca productos por nombre o código de barras
-     */    public function buscarProductos(Request $request)
+     */
+    public function buscarProductos(Request $request)
     {
         $busqueda = $request->busqueda;
         
         $productos = Producto::where('estado', 'activo')
             ->where(function($query) use ($busqueda) {
-                $query->whereRaw('LOWER(nombre) LIKE ?', ['%' . strtolower($busqueda) . '%'])
-                    ->orWhereRaw('LOWER(codigo) LIKE ?', ['%' . strtolower($busqueda) . '%']);
+                $query->where('nombre', 'LIKE', "%{$busqueda}%")
+                    ->orWhere('codigo', 'LIKE', "%{$busqueda}%");
             })
             ->where('stock', '>', 0)
             ->get();

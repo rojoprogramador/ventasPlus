@@ -109,6 +109,7 @@
                 <th>Producto</th>
                 <th class="text-right">Precio Unit.</th>
                 <th class="text-center">Cant.</th>
+                <th class="text-right">Descuento</th>
                 <th class="text-right">Subtotal</th>
             </tr>
         </thead>
@@ -118,16 +119,29 @@
                 <td>{{ $detalle['nombre'] }}</td>
                 <td class="text-right">${{ number_format($detalle['precio_unitario'], 2) }}</td>
                 <td class="text-center">{{ $detalle['cantidad'] }}</td>
-                <td class="text-right">${{ number_format($detalle['precio_unitario'] * $detalle['cantidad'], 2) }}</td>
+                <td class="text-right">
+                    @if(isset($detalle['descuento']) && $detalle['descuento'] > 0)
+                        @if($detalle['tipo_descuento'] === 'porcentaje')
+                            {{ $detalle['descuento'] }}%
+                        @else
+                            ${{ number_format($detalle['descuento'], 2) }}
+                        @endif
+                    @else
+                        -
+                    @endif
+                </td>
+                <td class="text-right">${{ number_format($detalle['subtotal'], 2) }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
 
     <div class="totales">
-        <p><strong>Subtotal:</strong> ${{ number_format($venta['subtotal'], 2) }}</p>
-        <p><strong>Descuentos:</strong> ${{ number_format($venta['descuentos'], 2) }}</p>
-        <p class="total"><strong>Total:</strong> ${{ number_format($venta['total'], 2) }}</p>
+        <p><strong>Subtotal sin descuentos:</strong> ${{ number_format($venta['subtotal'] + ($venta['descuentos'] ?? 0), 2) }}</p>
+        @if(isset($venta['descuentos']) && $venta['descuentos'] > 0)
+            <p class="text-red"><strong>Descuentos totales:</strong> -${{ number_format($venta['descuentos'], 2) }}</p>
+        @endif
+        <p class="total"><strong>Total Final:</strong> ${{ number_format($venta['total'], 2) }}</p>
         
         @if(isset($venta['metodo_pago']) && $venta['metodo_pago'] === 'efectivo' && isset($venta['monto_entregado']))
         <p><strong>Monto entregado:</strong> ${{ number_format($venta['monto_entregado'], 2) }}</p>
